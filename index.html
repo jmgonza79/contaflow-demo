@@ -199,6 +199,7 @@
   .kpi{
     background:linear-gradient(180deg,var(--surface2),var(--surface));
     border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;
+    text-align:center;
   }
   .kpi::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--emerald));opacity:.8;}
   .kpi .lbl{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;font-weight:600;}
@@ -513,6 +514,36 @@
     padding:2px 8px;border-radius:20px;background:rgba(34,211,238,0.12);color:var(--cyan);
     font-family:'JetBrains Mono',monospace;letter-spacing:0.03em;
   }
+
+  /* audit: aging + user tags */
+  .age-badge{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;
+    padding:2px 9px;border-radius:20px;flex-shrink:0;white-space:nowrap;
+  }
+  .age-badge.age-ok{background:var(--emerald-glow);color:var(--emerald);}
+  .age-badge.age-warn{background:var(--amber-glow);color:var(--amber);}
+  .age-badge.age-crit{background:var(--coral-glow);color:var(--coral);}
+  .audit-accordion{display:flex;flex-direction:column;gap:10px;}
+  .audit-acc-item{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    border-left:3px solid var(--auc,var(--emerald));overflow:hidden;
+  }
+  .audit-acc-head{
+    display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer;
+    transition:background .12s;flex-wrap:wrap;
+  }
+  .audit-acc-head:hover{background:var(--surface2);}
+  .audit-acc-head .au-name{font-weight:600;font-size:13.5px;flex:1;min-width:120px;}
+  .audit-acc-mid{display:flex;align-items:center;gap:12px;}
+  .audit-acc-mid .au-count{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--auc,var(--emerald));line-height:1;}
+  .audit-acc-mid .au-note{font-size:11px;color:var(--auc,var(--text-dim));font-weight:600;white-space:nowrap;}
+  .audit-acc-chevron{font-size:14px;color:var(--text-mute);transition:transform .25s ease;flex-shrink:0;}
+  .audit-acc-chevron.open{transform:rotate(180deg);}
+  .audit-acc-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.2,.8,.2,1);}
+  .audit-acc-body.open{grid-template-rows:1fr;}
+  .audit-acc-inner{overflow:hidden;min-height:0;padding:0 16px;}
+  .audit-acc-body.open .audit-acc-inner{padding:2px 16px 14px;}
+  .audit-acc-inner .queue-item:last-child{margin-bottom:0;}
 
   /* ============ ARCHIVO DRIVE ============ */
   .drive-tree{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
@@ -1096,6 +1127,8 @@ let DOCS = [
   {id:'DOC-0240', proveedor:'DEMO_Importadora Cibao Corp', tipo:'Factura', fecha:'2026-07-04', ncf:'B0100004498', rnc:'130201456', subtotal:18982.03, itbis:3417.97, total:22400.00, pago:'Transferencia', categoria:'Equipos', centro:'Operaciones', area:'Ana Rosales', estado:'ok', obs:null, correctedBy:null},
   {id:'DOC-0241', proveedor:'DEMO_Nómina Julio Q1', tipo:'Comprobante', fecha:'2026-07-04', ncf:'—', rnc:'—', subtotal:0, itbis:0, total:0, pago:'—', categoria:'Nómina', centro:'RRHH', area:'María Checo', estado:'warn', obs:'Falta soporte de horas extra de 2 empleados', correctedBy:null},
   {id:'DOC-0242', proveedor:'DEMO_Taller Mecánico Belén', tipo:'Factura', fecha:'2026-07-03', ncf:'B0100004230', rnc:'130876541', subtotal:3347.46, itbis:602.54, total:3950.00, pago:'Efectivo', categoria:'Combustible', centro:'Logística', area:'Pedro Durán', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0243', proveedor:'DEMO_Lubricantes del Cibao', tipo:'Factura', fecha:'2026-07-06', ncf:'B0200011940', rnc:'101223456', subtotal:2669.49, itbis:480.51, total:3150.00, pago:'Efectivo', categoria:'Combustible', centro:'Logística', area:'Pedro Durán', estado:'err', obs:'RNC no coincide con el registrado para este proveedor — verificar', correctedBy:null},
+  {id:'DOC-0244', proveedor:'DEMO_Clínica Corporativa Salud', tipo:'Comprobante', fecha:'2026-07-03', ncf:'—', rnc:'132009887', subtotal:6200.00, itbis:0, total:6200.00, pago:'Transferencia', categoria:'Nómina', centro:'RRHH', area:'María Checo', estado:'err', obs:'Falta certificado médico anexo — documento incompleto', correctedBy:null},
 ];
 
 const MAILS = [
@@ -1113,7 +1146,7 @@ const INCOMING = [
   {proveedor:'DEMO_Agua Cristal del Este', tipo:'Factura', fecha:'2026-07-09', ncf:'B0200019554', rnc:'132664401', subtotal:1610.17, itbis:289.83, total:1900.00, pago:'Efectivo', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', fail:'blur'},
 ];
 let incomingIdx = 0;
-let nextDocNum = 243;
+let nextDocNum = 245;
 let processing = false;
 
 /* datos de conciliación bancaria */
@@ -1182,6 +1215,15 @@ const EMPRESAS = [
 /* ===================== helpers ===================== */
 const $ = id => document.getElementById(id);
 function money(n){return 'RD$' + n.toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+const TODAY_REF = new Date('2026-07-09');
+function diasPendiente(fecha){
+  const d = new Date(fecha);
+  return Math.max(Math.round((TODAY_REF - d)/(1000*60*60*24)), 0);
+}
+function ageBadge(dias){
+  const cls = dias<=2 ? 'age-ok' : dias<=4 ? 'age-warn' : 'age-crit';
+  return `<span class="age-badge ${cls}">${dias===0?'hoy':dias+'d pendiente'}</span>`;
+}
 function chip(e, doc){
   if(e==='ok' && doc && doc.correctedBy) return '<span class="chip corrected">✎ Corregido</span>';
   if(e==='ok') return '<span class="chip ok">Correcto</span>';
@@ -1250,8 +1292,7 @@ function navItems(){
       {sec:'Operación'},
       {id:'panel',label:'Panel',ic:'▦'},
       {id:'procesar',label:'Procesar con IA',ic:'✦'},
-      {id:'revision',label:'Revisión humana',ic:'✎',pill:pendReview||null},
-      {id:'cola',label:'Cola de trabajo',ic:'☰'},
+      {id:'revision',label:'Pendientes por revisión',ic:'✎',pill:pendReview||null},
       {id:'documentos',label:'Documentos',ic:'▤'},
       {id:'problemas',label:'Con problemas',ic:'△',pill:probl},
       {sec:'Conciliación'},
@@ -1275,8 +1316,7 @@ function navItems(){
       {sec:'Operación'},
       {id:'panel',label:'Panel',ic:'▦'},
       {id:'procesar',label:'Procesar con IA',ic:'✦'},
-      {id:'revision',label:'Revisión humana',ic:'✎',pill:myPend||null},
-      {id:'cola',label:'Mi cola de trabajo',ic:'☰',pill:myPend||null},
+      {id:'revision',label:'Pendientes por revisión',ic:'✎',pill:myPend||null},
       {id:'documentos',label:'Documentos',ic:'▤'},
       {sec:'Conciliación'},
       {id:'conciliacion',label:'Conciliación bancaria',ic:'⇌'},
@@ -1289,6 +1329,7 @@ function navItems(){
     gerencial:[
       {sec:'Dirección'},
       {id:'panel',label:'Dashboard ejecutivo',ic:'▦'},
+      {id:'revision',label:'Pendientes por revisión',ic:'✎',pill:pendReview||null},
       {id:'documentos',label:'Documentos',ic:'▤'},
       {id:'resumen',label:'Resumen diario',ic:'◷'},
       {id:'salida',label:'Hoja de salida',ic:'⊞'},
@@ -1311,7 +1352,7 @@ function navigate(view){
   buildNav();
   document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===view));
   const m=$('main-content');
-  const R={panel:renderPanel,procesar:renderProcesar,revision:renderRevision,cola:renderCola,documentos:renderDocumentos,problemas:renderProblemas,conciliacion:renderConciliacion,dgii:renderDGII,ncfcontrol:renderNCFControl,cierre:renderCierre,multiempresa:renderMultiEmpresa,correo:renderCorreo,salida:renderSalida,resumen:renderResumenDiario,archivo:renderArchivo,config:renderConfig};
+  const R={panel:renderPanel,procesar:renderProcesar,revision:renderRevision,documentos:renderDocumentos,problemas:renderProblemas,conciliacion:renderConciliacion,dgii:renderDGII,ncfcontrol:renderNCFControl,cierre:renderCierre,multiempresa:renderMultiEmpresa,correo:renderCorreo,salida:renderSalida,resumen:renderResumenDiario,archivo:renderArchivo,config:renderConfig};
   if(view==='review-detail') { m.innerHTML=renderReviewDetail(reviewDocId); window.scrollTo(0,0); return; }
   m.innerHTML=(R[view]||renderPanel)();
   if(view==='documentos') attachFilters();
@@ -1342,7 +1383,13 @@ function renderPanel(){
   return `
   <div class="main-header">
     <div><h2>${isRO?'Dashboard ejecutivo':'Panel'}</h2><div class="sub">Julio 2026 · al día 9 · Contable Rosales &amp; Asociados</div></div>
-    ${demoBadge()}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción se genera un PDF del dashboard con KPIs y gráficos.')">⬇ PDF</button>
+      </div>
+    </div>
   </div>
   ${isRO?'<div class="note readonly">👁 Rol Gerencial — vista de solo lectura: KPIs, reportes y documentos. Sin acciones de edición.</div>':''}
 
@@ -1382,7 +1429,7 @@ function renderPanel(){
   <section class="block" style="margin-top:24px;">
     <div class="block-head">
       <h3>Últimos documentos con problemas <span class="count bad">${probl}</span></h3>
-      ${!isRO?`<button class="btn-ghost" onclick="navigate('${currentUser.role==='admin'?'problemas':'cola'}')">Ver todos →</button>`:''}
+      ${!isRO?`<button class="btn-ghost" onclick="navigate('${currentUser.role==='admin'?'problemas':'revision'}')">Ver todos →</button>`:''}
     </div>
     ${DOCS.filter(d=>d.estado!=='ok').slice(0,3).map(d=>`
       <div class="queue-item">
@@ -1575,47 +1622,26 @@ function nextIncoming(){
   navigate('procesar');
 }
 
-/* ===================== COLA ===================== */
-function renderCola(){
-  const mine = currentUser.role==='admin' ? DOCS.filter(d=>d.estado!=='ok') : DOCS.filter(d=>d.area===currentUser.name && d.estado!=='ok');
-  return `
-  <div class="main-header">
-    <div><h2>${currentUser.role==='admin'?'Cola de trabajo general':'Mi cola de trabajo'}</h2>
-    <div class="sub">Área: ${currentUser.area}</div></div>
-    ${demoBadge()}
-  </div>
-  <div class="note info">ℹ Los documentos correctos fluyen solos a <b>/Procesados</b>. Aquí solo aparece lo que necesita criterio humano.</div>
-  <section class="block">
-    <div class="block-head"><h3>Pendientes <span class="count ${mine.length?'bad':''}">${mine.length}</span></h3></div>
-    ${mine.length?mine.map(d=>`
-      <div class="queue-item">
-        <div class="qi-icon ${d.estado}">${d.estado==='err'?'✕':'!'}</div>
-        <div class="qi-body">
-          <div class="qi-title">${d.id} — ${d.proveedor}</div>
-          <div class="qi-meta">${d.tipo} · ${d.fecha} · NCF <span class="ncf">${d.ncf}</span> · ${money(d.total)}${currentUser.role==='admin'?` · ${d.area}`:''}</div>
-          <div class="obs">${d.obs}</div>
-        </div>
-        <button class="btn-solid" onclick="openReview('${d.id}')">✎ Revisar y corregir</button>
-      </div>`).join(''):'<div class="empty">✓ Nada pendiente en tu área. Todo al día.</div>'}
-  </section>`;
-}
-function resolveDoc(id){
-  openReview(id);
-}
-
 /* ===================== DOCUMENTOS ===================== */
 function renderDocumentos(){
   return `
   <div class="main-header">
     <div><h2>Documentos</h2><div class="sub">Todos los documentos del mes con filtros</div></div>
-    ${demoBadge()}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se exporta la tabla filtrada.')">⬇ Excel</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera PDF con la tabla.')">⬇ PDF</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera CSV para importar a otros sistemas.')">⬇ CSV</button>
+      </div>
+    </div>
   </div>
   <div class="filters">
     <select id="f-estado"><option value="">Estado: todos</option><option value="ok">Correcto</option><option value="warn">Incompleto</option><option value="err">Error</option></select>
     <select id="f-cat"><option value="">Categoría: todas</option>${[...new Set(DOCS.map(d=>d.categoria))].map(c=>`<option>${c}</option>`).join('')}</select>
     <input type="text" id="f-prov" placeholder="Buscar proveedor…">
     <div class="fspacer"></div>
-    <button class="btn-ghost" onclick="toast('Exportación','En la versión conectada esto descarga el Excel con los filtros aplicados.')">⬇ Excel</button>
   </div>
   <div class="card">
     <table>
@@ -1653,7 +1679,14 @@ function renderProblemas(){
   return `
   <div class="main-header">
     <div><h2>Documentos con problemas</h2><div class="sub">Observación específica por documento — carpeta /Con_Errores</div></div>
-    ${demoBadge()}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera PDF con los errores pendientes.')">⬇ PDF</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera Excel del listado de errores.')">⬇ Excel</button>
+      </div>
+    </div>
   </div>
   <div class="card">
     <table>
@@ -1665,31 +1698,85 @@ function renderProblemas(){
   </div>`;
 }
 
-/* ===================== REVISIÓN HUMANA ===================== */
+/* ===================== PENDIENTES POR REVISIÓN ===================== */
 let reviewDocId = null;
-function renderRevision(){
-  const mine = currentUser.role==='admin' ? DOCS.filter(d=>d.estado!=='ok') : DOCS.filter(d=>d.area===currentUser.name && d.estado!=='ok');
-  const corrected = DOCS.filter(d=>d.correctedBy);
-  return `
-  <div class="main-header">
-    <div><h2>Revisión humana</h2><div class="sub">Documentos que la IA marcó con problemas — comparar, corregir y archivar</div></div>
-    ${demoBadge()}
-  </div>
-  <div class="note info">ℹ Selecciona un documento para abrir la vista dividida: a la izquierda el documento original (escaneado/digital), a la derecha los campos editables para corregir. Al guardar, el documento se mueve a <b>/Procesados</b> con la etiqueta de quién lo corrigió.</div>
+let revExpandedUser = null;
 
-  <section class="block">
-    <div class="block-head"><h3>Pendientes de revisión <span class="count bad">${mine.length}</span></h3></div>
-    ${mine.length ? mine.map(d=>`
+function renderRevision(){
+  const isAudit = currentUser.role==='admin' || currentUser.role==='gerencial';
+  const pending = isAudit ? DOCS.filter(d=>d.estado!=='ok') : DOCS.filter(d=>d.area===currentUser.name && d.estado!=='ok');
+  const corrected = isAudit ? DOCS.filter(d=>d.correctedBy) : DOCS.filter(d=>d.correctedBy && d.area===currentUser.name);
+  const canEdit = currentUser.role!=='gerencial';
+
+  function docItemHTML(d){
+    return `
       <div class="queue-item" style="cursor:pointer;" onclick="openReview('${d.id}')">
         <div class="qi-icon ${d.estado}">${d.estado==='err'?'✕':'!'}</div>
         <div class="qi-body">
           <div class="qi-title">${d.id} — ${d.proveedor}</div>
-          <div class="qi-meta">${d.tipo} · ${d.fecha} · NCF <span class="ncf">${d.ncf}</span> · ${money(d.total)}${currentUser.role==='admin'?' · '+d.area:''}</div>
+          <div class="qi-meta">${d.tipo} · ${d.fecha} · NCF <span class="ncf">${d.ncf}</span> · ${money(d.total)}</div>
           <div class="obs">${d.obs}</div>
         </div>
-        <button class="btn-solid" onclick="event.stopPropagation();openReview('${d.id}')">✎ Revisar y corregir</button>
-      </div>`).join('') : '<div class="empty">✓ No hay documentos pendientes de revisión. Todo al día.</div>'}
-  </section>
+        ${ageBadge(diasPendiente(d.fecha))}
+        ${canEdit?`<button class="btn-solid" onclick="event.stopPropagation();openReview('${d.id}')">✎ Revisar y corregir</button>`:''}
+      </div>`;
+  }
+
+  let bodyHTML;
+  if(isAudit){
+    const users = [...new Set(DOCS.map(d=>d.area))];
+    bodyHTML = `
+    <section class="block">
+      <div class="block-head"><h3>Pendientes por usuario <span style="font-weight:400;color:var(--text-mute);font-size:11.5px;">— clic para ver el detalle</span></h3></div>
+      <div class="audit-accordion">
+        ${users.map(u=>{
+          const up = pending.filter(d=>d.area===u).sort((a,b)=>diasPendiente(b.fecha)-diasPendiente(a.fecha));
+          const maxAge = up.length ? Math.max(...up.map(d=>diasPendiente(d.fecha))) : 0;
+          const color = up.length===0 ? 'var(--emerald)' : maxAge<=2 ? 'var(--emerald)' : maxAge<=4 ? 'var(--amber)' : 'var(--coral)';
+          const note = up.length===0 ? '✓ Sin pendientes' : `Más antiguo: ${maxAge} día${maxAge===1?'':'s'}`;
+          const isOpen = revExpandedUser === u;
+          return `
+          <div class="audit-acc-item" style="--auc:${color}">
+            <div class="audit-acc-head" onclick="toggleRevUser('${u.replace(/'/g,"\\'")}')">
+              <div class="au-name">${u}</div>
+              <div class="audit-acc-mid">
+                <div class="au-count">${up.length}</div>
+                <div class="au-note">${note}</div>
+              </div>
+              <div class="audit-acc-chevron ${isOpen?'open':''}">⌄</div>
+            </div>
+            <div class="audit-acc-body ${isOpen?'open':''}">
+              <div class="audit-acc-inner">
+                ${up.length ? up.map(docItemHTML).join('') : '<div class="empty" style="padding:16px 0;">✓ Sin pendientes para este usuario.</div>'}
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </section>`;
+  } else {
+    bodyHTML = `
+    <section class="block">
+      <div class="block-head"><h3>Mis pendientes <span class="count bad">${pending.length}</span></h3></div>
+      ${pending.length ? pending.slice().sort((a,b)=>diasPendiente(b.fecha)-diasPendiente(a.fecha)).map(docItemHTML).join('') : '<div class="empty">✓ No hay documentos pendientes. Todo al día.</div>'}
+    </section>`;
+  }
+
+  return `
+  <div class="main-header">
+    <div><h2>Pendientes por revisión</h2><div class="sub">${isAudit?'Vista de equipo — todos los usuarios':'Tus documentos asignados · '+currentUser.area}</div></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera PDF del reporte de pendientes por usuario.')">⬇ PDF</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera Excel con los pendientes.')">⬇ Excel</button>
+      </div>
+    </div>
+  </div>
+  <div class="note info">ℹ ${isAudit?'Ves los pendientes de <b>todo el equipo</b>, agrupados por usuario. Haz clic en cada recuadro para ver — y corregir — sus documentos de forma individual.'+(currentUser.role==='gerencial'?' Como rol Gerencial, esta vista es de solo lectura.':''):'Selecciona un documento para abrir la vista dividida: a la izquierda el original, a la derecha los campos editables. Al guardar, pasa a <b>/Procesados</b> con tu etiqueta de corrección.'}</div>
+
+  ${bodyHTML}
 
   ${corrected.length ? `<section class="block">
     <div class="block-head"><h3>Corregidos recientemente <span class="count">${corrected.length}</span></h3></div>
@@ -1703,6 +1790,11 @@ function renderRevision(){
         ${chip(d.estado,d)}
       </div>`).join('')}
   </section>` : ''}`;
+}
+
+function toggleRevUser(u){
+  revExpandedUser = (revExpandedUser === u) ? null : u;
+  $('main-content').innerHTML = renderRevision();
 }
 
 function openReview(id){
@@ -2097,7 +2189,14 @@ function renderArchivo(){
   return `
   <div class="main-header">
     <div><h2>Repositorio Google Drive</h2><div class="sub">Estructura de carpetas por empresa — todos los documentos quedan archivados y organizados</div></div>
-    ${demoBadge()}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera un inventario PDF de todos los documentos archivados.')">⬇ PDF</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera CSV con la lista de archivos y metadatos.')">⬇ CSV</button>
+      </div>
+    </div>
   </div>
   <div class="note info">ℹ En producción, cada empresa tiene su propio Google Drive con esta estructura. Cada documento procesado queda guardado en la carpeta correspondiente, con nombre estandarizado: <b>FECHA_PROVEEDOR_NCF.pdf</b></div>
 
@@ -2250,7 +2349,13 @@ function renderNCFControl(){
   return `
   <div class="main-header">
     <div><h2>Control de secuencias NCF</h2><div class="sub">Seguimiento de comprobantes fiscales autorizados por la DGII</div></div>
-    ${demoBadge()}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera PDF con el estado de las secuencias NCF.')">⬇ PDF</button>
+      </div>
+    </div>
   </div>
   <div class="note info">ℹ ContaFlow monitorea el uso de cada secuencia autorizada. Cuando quedan menos del 20% de comprobantes o faltan menos de 90 días para el vencimiento, se genera una alerta automática.</div>
 
@@ -2440,7 +2545,13 @@ function renderCorreo(){
   return `
   <div class="main-header">
     <div><h2>Correo monitoreado</h2><div class="sub">Módulo 2 — IMAP / Microsoft Graph según onboarding</div></div>
-    ${demoBadge()}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera PDF con el log de correos procesados.')">⬇ PDF</button>
+      </div>
+    </div>
   </div>
   <div class="note info">ℹ ContaFlow solo lee las direcciones configuradas por la empresa. Extrae los adjuntos, los deposita en <b>/Por_Procesar</b> y notifica al responsable interno — nunca al remitente.</div>
   <div class="grid-32">
@@ -2478,6 +2589,7 @@ function renderSalida(){
         <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
         <button class="btn-ghost" onclick="toast('Exportación','En producción esto descarga la hoja completa como Excel.')">⬇ Excel</button>
         <button class="btn-ghost" onclick="toast('Exportación','En producción esto genera un PDF de la hoja de salida.')">⬇ PDF</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción se genera CSV para importar a otros sistemas.')">⬇ CSV</button>
       </div>
     </div>
   </div>
@@ -2573,15 +2685,15 @@ const TOUR_STEPS = [
   {target:'.extract-panel', title:'Extracción y validación en vivo', waitExtract:true,
    text:'La IA lee tipo de documento, proveedor, RNC, NCF, ITBIS, total… y valida el formato fiscal dominicano. Al terminar, el documento se mueve a su carpeta y se notifica al responsable. <b>Espera a que termine…</b>',
    pre:()=>{ if(!document.querySelector('.extract-panel')) navigate('procesar'); }},
-  {target:'section.block', title:'Revisión humana: la clave del control',
-   text:'Cuando la IA detecta un problema, el documento llega aquí. El analista ve la lista completa de pendientes y hace clic en <b>Revisar y corregir</b> para abrir la vista dividida.',
-   pre:()=>navigate('revision')},
+  {target:'.audit-accordion', title:'Pendientes por revisión: vista de equipo',
+   text:'Como Admin, no solo ves tus documentos — ves los de <b>todo el equipo</b>, agrupados en recuadros por usuario. Mira los colores: Ana está al día (verde), Pedro lleva días esperando (ámbar) y María tiene el más atrasado (rojo). Cada recuadro es desplegable.',
+   pre:()=>{ revExpandedUser=null; navigate('revision'); }},
+  {target:'.audit-acc-body.open', title:'Un clic para ver el detalle de cada quien',
+   text:'Al hacer clic en el recuadro de <b>María Checo</b> se despliegan solo sus documentos — incluyendo uno con 6 días de espera. Así el admin da seguimiento sin mezclar el trabajo de todo el equipo en una sola lista. Cuando Pedro o María entren con su propia cuenta, verán esta misma pantalla pero <b>solo con sus documentos</b>.',
+   pre:()=>{ revExpandedUser='María Checo'; navigate('revision'); }},
   {target:'.rev-split', title:'Vista dividida: documento + corrección',
-   text:'A la izquierda, el documento original (PDF/escaneo). A la derecha, todos los campos editables con el error resaltado. El analista compara, corrige y archiva sin salir de esta pantalla. Al guardar, el documento queda marcado con las iniciales de quién lo corrigió.',
-   pre:()=>{ const err=DOCS.find(d=>d.estado!=='ok'); if(err) openReview(err.id); else navigate('revision'); }},
-  {target:'section.block', title:'La cola de trabajo',
-   text:'Vista alternativa: cada usuario ve solo los documentos de su área. También puede abrir la revisión desde aquí.',
-   pre:()=>navigate('cola')},
+   text:'Vamos a corregir el pendiente más antiguo de María. A la izquierda, el documento original. A la derecha, los campos editables con el error resaltado. Se compara, se corrige y se archiva sin salir de esta pantalla — y queda marcado con las iniciales de quién lo corrigió.',
+   pre:()=>{ const d=DOCS.find(x=>x.id==='DOC-0244') || DOCS.find(x=>x.estado!=='ok'); openReview(d.id); }},
   {target:'.filters', title:'Todos los documentos, con filtros',
    text:'Estado, categoría, proveedor… descarga a Excel e impresión. Los documentos corregidos por humano llevan la etiqueta ✎ con las iniciales del analista.',
    pre:()=>navigate('documentos')},
