@@ -1,0 +1,2760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContaFlow — Sistema Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E0D;
+    --bg2:#101412;
+    --surface:#151A18;
+    --surface2:#1B211E;
+    --border:#242B27;
+    --border-hi:#33403A;
+    --text:#E8ECEA;
+    --text-dim:#9AA6A0;
+    --text-mute:#5F6B65;
+    --emerald:#34D399;
+    --emerald-deep:#10B981;
+    --emerald-glow:rgba(52,211,153,0.14);
+    --amber:#FBBF24;
+    --amber-glow:rgba(251,191,36,0.12);
+    --coral:#FB7185;
+    --coral-glow:rgba(251,113,133,0.12);
+    --violet:#A78BFA;
+    --cyan:#22D3EE;
+    --r:14px;
+    --r-sm:9px;
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:14px;
+    line-height:1.55;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4,.disp{font-family:'Space Grotesk','Inter',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  ::selection{background:var(--emerald-glow);color:var(--emerald);}
+  button{font-family:'Inter',sans-serif;}
+  :focus-visible{outline:2px solid var(--emerald);outline-offset:2px;border-radius:4px;}
+
+  /* ============ LOGIN ============ */
+  #login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:24px;position:relative;overflow:hidden;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% -10%, rgba(52,211,153,0.10), transparent),
+      radial-gradient(ellipse 40% 40% at 10% 100%, rgba(34,211,238,0.06), transparent),
+      var(--bg);
+  }
+  .login-grid-bg{
+    position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:
+      linear-gradient(rgba(52,211,153,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,211,153,0.04) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+    -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+  }
+  .login-wrap{position:relative;z-index:1;width:100%;max-width:920px;display:grid;grid-template-columns:1fr 400px;gap:48px;align-items:center;}
+  .login-pitch h1{font-size:40px;font-weight:700;margin:0 0 6px;letter-spacing:-0.02em;line-height:1.1;}
+  .login-pitch h1 .accent{color:var(--emerald);}
+  .login-pitch p{color:var(--text-dim);font-size:15px;max-width:400px;}
+  .pitch-flow{display:flex;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap;}
+  .pitch-step{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);
+    padding:9px 14px;font-size:12px;color:var(--text-dim);font-weight:500;
+    display:flex;align-items:center;gap:7px;
+  }
+  .pitch-step .dot{width:7px;height:7px;border-radius:50%;background:var(--emerald);box-shadow:0 0 8px var(--emerald);}
+  .pitch-arrow{color:var(--text-mute);font-size:13px;}
+  .login-card{
+    background:linear-gradient(180deg, var(--surface2), var(--surface));
+    border:1px solid var(--border-hi);
+    border-radius:var(--r);
+    padding:34px 30px 26px;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(52,211,153,0.05);
+  }
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(135deg, var(--emerald-deep), #0E9F6E);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#052E22;
+    box-shadow:0 0 20px rgba(52,211,153,0.35);
+  }
+  .brand .bname{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;}
+  .brand .btag{font-size:10.5px;color:var(--text-mute);letter-spacing:0.08em;text-transform:uppercase;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px;}
+  .field input,.field select{
+    width:100%;padding:11px 13px;border-radius:var(--r-sm);
+    background:var(--bg2);border:1px solid var(--border);
+    color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus,.field select:focus{border-color:var(--emerald-deep);box-shadow:0 0 0 3px var(--emerald-glow);}
+  .btn-primary{
+    width:100%;padding:12px;border:none;border-radius:var(--r-sm);cursor:pointer;
+    background:linear-gradient(135deg, var(--emerald), var(--emerald-deep));
+    color:#052E22;font-weight:700;font-size:14px;letter-spacing:0.01em;
+    transition:transform .12s, box-shadow .12s;margin-top:8px;
+    box-shadow:0 4px 20px rgba(16,185,129,0.25);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 26px rgba(16,185,129,0.35);}
+  .btn-primary:active{transform:translateY(0);}
+  .login-error{
+    display:none;background:var(--coral-glow);border:1px solid rgba(251,113,133,0.3);
+    color:var(--coral);border-radius:var(--r-sm);padding:10px 13px;font-size:12.5px;margin-bottom:14px;
+  }
+  .login-users{margin-top:22px;padding-top:18px;border-top:1px dashed var(--border-hi);}
+  .login-users .t{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;font-weight:600;}
+  .u-chip{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;
+    color:var(--text-dim);transition:background .12s,color .12s;
+  }
+  .u-chip:hover{background:var(--bg2);color:var(--text);}
+  .u-chip .rle{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .rle.admin{background:var(--emerald-glow);color:var(--emerald);}
+  .rle.oper{background:var(--amber-glow);color:var(--amber);}
+  .rle.ger{background:rgba(167,139,250,0.12);color:var(--violet);}
+
+  /* ============ SHELL ============ */
+  #app{display:none;min-height:100vh;}
+  #app.active{display:grid;grid-template-columns:236px 1fr;}
+  .sidebar{
+    background:var(--bg2);border-right:1px solid var(--border);
+    padding:20px 14px;display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .sb-company{
+    margin:16px 4px 18px;padding:10px 12px;border-radius:var(--r-sm);
+    background:var(--surface);border:1px solid var(--border);
+    font-size:12px;color:var(--text-dim);
+  }
+  .sb-company .cn{color:var(--text);font-weight:600;font-size:12.5px;}
+  .sb-nav{list-style:none;margin:0;padding:0;flex:1;}
+  .sb-sec{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-mute);margin:16px 10px 6px;font-weight:600;}
+  .sb-nav a{
+    display:flex;align-items:center;gap:11px;padding:9px 11px;margin-bottom:1px;
+    border-radius:var(--r-sm);color:var(--text-dim);text-decoration:none;
+    font-size:13.5px;cursor:pointer;transition:background .12s,color .12s;position:relative;
+  }
+  .sb-nav a:hover{background:var(--surface);color:var(--text);}
+  .sb-nav a.active{background:var(--emerald-glow);color:var(--emerald);font-weight:600;}
+  .sb-nav a.active::before{
+    content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;
+    background:var(--emerald);border-radius:0 3px 3px 0;box-shadow:0 0 10px var(--emerald);
+  }
+  .sb-nav .ic{width:18px;text-align:center;font-size:14px;flex-shrink:0;}
+  .sb-nav .pill{
+    margin-left:auto;font-size:10px;font-weight:700;min-width:18px;text-align:center;
+    background:var(--coral-glow);color:var(--coral);border-radius:20px;padding:2px 6px;
+  }
+  .sb-foot{border-top:1px solid var(--border);padding-top:14px;margin-top:12px;}
+  .sb-user{display:flex;align-items:center;gap:10px;padding:4px;}
+  .sb-user .av{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--surface2),var(--surface));
+    border:1px solid var(--border-hi);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:12px;color:var(--emerald);
+  }
+  .sb-user .name{font-size:12.5px;font-weight:600;}
+  .sb-user .role{font-size:11px;color:var(--text-mute);}
+  .sb-logout{
+    margin-top:10px;width:100%;padding:9px;border-radius:var(--r-sm);cursor:pointer;
+    background:rgba(251,113,133,0.06);border:1px solid rgba(251,113,133,0.2);
+    color:var(--coral);font-size:12px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+  }
+  .sb-logout:hover{background:rgba(251,113,133,0.12);border-color:rgba(251,113,133,0.4);}
+
+  .main{padding:26px 34px 70px;max-width:1240px;width:100%;}
+  .mob-topbar{display:none;}
+  .sb-overlay{display:none;}
+  .main-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+  .main-header h2{font-size:24px;font-weight:700;margin:0 0 3px;letter-spacing:-0.01em;}
+  .main-header .sub{color:var(--text-dim);font-size:13px;}
+  .demo-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--amber-glow);color:var(--amber);border:1px solid rgba(251,191,36,0.25);
+    padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.04em;
+  }
+  .demo-badge .pulse{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(251,191,36,.4);}50%{opacity:.7;box-shadow:0 0 0 5px rgba(251,191,36,0);}}
+
+  /* KPIs */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .kpi{
+    background:linear-gradient(180deg,var(--surface2),var(--surface));
+    border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;
+  }
+  .kpi::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--emerald));opacity:.8;}
+  .kpi .lbl{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;font-weight:600;}
+  .kpi .val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1;letter-spacing:-0.01em;}
+  .kpi .delta{font-size:11.5px;margin-top:8px;color:var(--text-dim);}
+  .kpi .delta b{color:var(--emerald);font-weight:600;}
+  .kpi .delta b.bad{color:var(--coral);}
+
+  /* Pipeline */
+  .pipeline{
+    display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:0;align-items:stretch;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:18px 20px;margin-bottom:22px;
+  }
+  .pl-stage{text-align:center;padding:4px 10px;}
+  .pl-stage .n{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--text);}
+  .pl-stage .t{font-size:11px;color:var(--text-dim);margin-top:2px;}
+  .pl-stage .folder{font-size:10.5px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;margin-top:4px;}
+  .pl-arrow{display:flex;align-items:center;color:var(--emerald);font-size:16px;opacity:.6;padding:0 4px;}
+
+  section.block{margin-bottom:28px;}
+  .block-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+  .block-head h3{font-size:15px;font-weight:600;margin:0;display:flex;align-items:center;gap:9px;}
+  .count{background:var(--emerald-glow);color:var(--emerald);font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;}
+  .count.bad{background:var(--coral-glow);color:var(--coral);}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid-32{display:grid;grid-template-columns:3fr 2fr;gap:16px;}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;}
+  .card table{border-radius:var(--r);overflow:hidden;}
+  thead th{
+    text-align:left;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--text-mute);font-weight:600;padding:12px 14px;
+    border-bottom:1px solid var(--border-hi);background:var(--bg2);white-space:nowrap;
+  }
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .1s;}
+  tbody tr:hover{background:var(--surface2);}
+  .ncf{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);}
+  .rnc{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);}
+  .amt{font-family:'JetBrains Mono',monospace;font-weight:600;text-align:right;}
+
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+    padding:3px 10px;border-radius:20px;white-space:nowrap;
+  }
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .chip.ok{background:var(--emerald-glow);color:var(--emerald);}
+  .chip.warn{background:var(--amber-glow);color:var(--amber);}
+  .chip.err{background:var(--coral-glow);color:var(--coral);}
+  .obs{font-size:11.5px;color:var(--coral);}
+
+  .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+  .filters select,.filters input[type=text]{
+    padding:8px 12px;border-radius:var(--r-sm);background:var(--surface);
+    border:1px solid var(--border);color:var(--text);font-size:12.5px;font-family:'Inter',sans-serif;outline:none;
+  }
+  .filters select:focus,.filters input:focus{border-color:var(--emerald-deep);}
+  .fspacer{flex:1;}
+  .btn-ghost{
+    padding:8px 14px;border-radius:var(--r-sm);cursor:pointer;font-size:12.5px;font-weight:600;
+    background:var(--surface);border:1px solid var(--border);color:var(--text-dim);
+    display:inline-flex;align-items:center;gap:7px;transition:border-color .12s,color .12s;
+  }
+  .btn-ghost:hover{border-color:var(--emerald-deep);color:var(--emerald);}
+  .btn-solid{
+    padding:9px 16px;border:none;border-radius:var(--r-sm);cursor:pointer;font-size:12.5px;font-weight:700;
+    background:linear-gradient(135deg,var(--emerald),var(--emerald-deep));color:#052E22;
+    display:inline-flex;align-items:center;gap:7px;box-shadow:0 3px 14px rgba(16,185,129,0.2);
+    transition:transform .12s;
+  }
+  .btn-solid:hover{transform:translateY(-1px);}
+  .btn-solid:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+  /* queue */
+  .queue-item{
+    display:flex;align-items:center;gap:14px;padding:14px 18px;margin-bottom:9px;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    transition:border-color .12s;
+  }
+  .queue-item:hover{border-color:var(--border-hi);}
+  .qi-icon{
+    width:38px;height:38px;border-radius:10px;flex-shrink:0;font-size:16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .qi-icon.err{background:var(--coral-glow);color:var(--coral);}
+  .qi-icon.warn{background:var(--amber-glow);color:var(--amber);}
+  .qi-body{flex:1;min-width:0;}
+  .qi-title{font-weight:600;font-size:13.5px;}
+  .qi-meta{font-size:11.5px;color:var(--text-dim);margin-top:2px;}
+
+  .note{
+    display:flex;gap:11px;align-items:flex-start;padding:13px 16px;border-radius:var(--r);
+    font-size:12.5px;margin-bottom:20px;
+  }
+  .note.info{background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.2);color:#A5E8F5;}
+  .note.readonly{background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.25);color:#CBB8FD;}
+
+  /* charts */
+  .chart-card{padding:18px 20px;}
+  .chart-card h4{margin:0 0 14px;font-size:13.5px;font-weight:600;color:var(--text);}
+  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .bar-row .bl{width:110px;font-size:12px;color:var(--text-dim);flex-shrink:0;text-align:right;}
+  .bar-track{flex:1;height:22px;background:var(--bg2);border-radius:6px;overflow:hidden;position:relative;}
+  .bar-fill{
+    height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;color:#052E22;
+    background:linear-gradient(90deg,var(--emerald-deep),var(--emerald));
+    min-width:36px;transition:width .8s cubic-bezier(.2,.8,.2,1);
+  }
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;}
+  .legend .li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-dim);}
+  .legend .sw{width:10px;height:10px;border-radius:3px;}
+
+  /* ============ PROCESADOR IA ============ */
+  .proc-grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+  .doc-preview{
+    padding:20px;position:relative;overflow:hidden;min-height:420px;
+  }
+  .doc-paper{
+    background:#F4F2EC;color:#2A2A26;border-radius:8px;padding:18px 16px;
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.7;
+    position:relative;overflow:hidden;min-height:360px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  }
+  .doc-paper.blurry{filter:blur(1.6px);}
+  .doc-paper .dp-head{font-weight:700;font-size:12px;border-bottom:1px solid #C9C5B8;padding-bottom:8px;margin-bottom:8px;}
+  .doc-paper .dp-row{display:flex;justify-content:space-between;gap:8px;}
+  .doc-paper .dp-total{border-top:1px dashed #C9C5B8;margin-top:8px;padding-top:8px;font-weight:700;font-size:11.5px;}
+  .scanline{
+    position:absolute;left:0;right:0;height:52px;top:-60px;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(52,211,153,0.28),rgba(52,211,153,0.5),rgba(52,211,153,0.28),transparent);
+    box-shadow:0 0 26px rgba(52,211,153,0.5);
+    display:none;
+  }
+  .scanline.on{display:block;animation:scan 2.4s linear infinite;}
+  @keyframes scan{0%{top:-60px;}100%{top:105%;}}
+  .extract-panel{padding:20px 22px;}
+  .xt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .xt-head h4{margin:0;font-size:14px;}
+  .xt-status{font-size:11.5px;font-weight:600;color:var(--text-dim);display:flex;align-items:center;gap:8px;}
+  .xt-status .spin{
+    width:13px;height:13px;border:2px solid var(--border-hi);border-top-color:var(--emerald);
+    border-radius:50%;animation:rot .7s linear infinite;display:none;
+  }
+  .xt-status.working .spin{display:block;}
+  .xt-status.working{color:var(--emerald);}
+  @keyframes rot{to{transform:rotate(360deg);}}
+  .xt-fields{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;}
+  .xt-field{
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);
+    padding:9px 12px;opacity:.35;transition:opacity .3s, border-color .3s;
+  }
+  .xt-field.filled{opacity:1;border-color:var(--border-hi);}
+  .xt-field.filled.flash{border-color:var(--emerald);box-shadow:0 0 12px var(--emerald-glow);}
+  .xt-field .fl{font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-mute);font-weight:600;}
+  .xt-field .fv{font-size:13px;font-weight:600;margin-top:2px;min-height:19px;font-family:'JetBrains Mono',monospace;}
+  .xt-field .fv .caret{display:inline-block;width:7px;height:14px;background:var(--emerald);vertical-align:-2px;animation:blink .7s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .valid-list{margin-top:18px;border-top:1px solid var(--border);padding-top:14px;}
+  .valid-list h5{margin:0 0 10px;font-size:12px;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;}
+  .v-item{
+    display:flex;align-items:center;gap:10px;padding:6px 2px;font-size:12.5px;color:var(--text-mute);
+    opacity:.4;transition:opacity .3s;
+  }
+  .v-item.done{opacity:1;color:var(--text-dim);}
+  .v-item .vi{
+    width:18px;height:18px;border-radius:50%;flex-shrink:0;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--border);
+  }
+  .v-item.done.pass .vi{background:var(--emerald-glow);border-color:var(--emerald-deep);color:var(--emerald);}
+  .v-item.done.fail .vi{background:var(--coral-glow);border-color:var(--coral);color:var(--coral);}
+  .proc-result{
+    margin-top:16px;padding:13px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;display:none;
+    align-items:center;gap:10px;
+  }
+  .proc-result.show{display:flex;}
+  .proc-result.ok{background:var(--emerald-glow);border:1px solid rgba(52,211,153,0.3);color:var(--emerald);}
+  .proc-result.err{background:var(--coral-glow);border:1px solid rgba(251,113,133,0.3);color:var(--coral);}
+  .proc-result.warn{background:var(--amber-glow);border:1px solid rgba(251,191,36,0.3);color:var(--amber);}
+
+  /* toast */
+  #toast-zone{position:fixed;bottom:24px;right:24px;z-index:320;display:flex;flex-direction:column;gap:10px;}
+  .toast{
+    background:var(--surface2);border:1px solid var(--border-hi);border-left:3px solid var(--emerald);
+    border-radius:var(--r-sm);padding:13px 16px;min-width:280px;max-width:360px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.5);font-size:12.5px;
+    animation:slidein .3s cubic-bezier(.2,.8,.2,1);
+  }
+  .toast .tt{font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;margin-bottom:3px;color:var(--emerald);}
+  .toast .tb{color:var(--text-dim);}
+  @keyframes slidein{from{transform:translateX(40px);opacity:0;}to{transform:none;opacity:1;}}
+
+  /* email views */
+  .mail-item{
+    display:flex;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);align-items:flex-start;
+  }
+  .mail-item:last-child{border-bottom:none;}
+  .mail-av{
+    width:36px;height:36px;border-radius:10px;flex-shrink:0;font-size:13px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg2);border:1px solid var(--border-hi);color:var(--cyan);
+  }
+  .mail-body{flex:1;min-width:0;}
+  .mail-from{font-weight:600;font-size:13px;}
+  .mail-subj{font-size:12.5px;color:var(--text-dim);margin-top:1px;}
+  .mail-att{
+    display:inline-flex;align-items:center;gap:6px;margin-top:7px;margin-right:6px;
+    background:var(--bg2);border:1px solid var(--border);border-radius:6px;
+    padding:4px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);
+  }
+  .mail-route{font-size:11px;color:var(--emerald);margin-top:6px;}
+  .mail-time{font-size:11px;color:var(--text-mute);flex-shrink:0;}
+
+  .daily-mail{
+    max-width:640px;background:var(--surface);border:1px solid var(--border-hi);border-radius:var(--r);overflow:hidden;
+  }
+  .dm-head{background:var(--bg2);padding:16px 22px;border-bottom:1px solid var(--border);}
+  .dm-head .s{font-size:11px;color:var(--text-mute);}
+  .dm-head .j{font-weight:700;font-size:15px;font-family:'Space Grotesk',sans-serif;margin-top:2px;}
+  .dm-body{padding:22px;}
+  .dm-stat{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13px;}
+  .dm-stat .v{font-family:'JetBrains Mono',monospace;font-weight:600;}
+  .dm-sec{font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-mute);font-weight:700;margin:18px 0 8px;}
+
+  /* sheets view */
+  .sheet-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
+  .sheet{border-collapse:collapse;min-width:980px;background:#FDFDFB;}
+  .sheet th{
+    background:#EFF1EE;color:#3C4340;font-size:11px;font-weight:700;border:1px solid #D5DAD6;
+    padding:7px 10px;text-align:left;position:sticky;top:0;
+  }
+  .sheet th.rowh{background:#E4E8E5;text-align:center;width:34px;}
+  .sheet td{
+    border:1px solid #E2E6E2;padding:7px 10px;font-size:12px;color:#24302B;
+    font-family:'Inter',sans-serif;white-space:nowrap;background:#FDFDFB;
+  }
+  .sheet td.rowh{background:#EFF1EE;color:#6B736E;text-align:center;font-size:11px;}
+  .sheet td.num{font-family:'JetBrains Mono',monospace;text-align:right;}
+  .sheet td.st-ok{color:#0E7D50;font-weight:600;}
+  .sheet td.st-err{color:#C13B3B;font-weight:600;}
+  .sheet td.st-warn{color:#9A6B12;font-weight:600;}
+  .sheet-bar{
+    display:flex;align-items:center;gap:10px;background:#F1F3F0;border:1px solid #D5DAD6;border-bottom:none;
+    border-radius:var(--r) var(--r) 0 0;padding:9px 14px;font-size:12px;color:#3C4340;
+  }
+  .sheet-bar .gdot{width:22px;height:22px;border-radius:5px;background:#188038;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;}
+  .sheet-bar + .sheet-wrap{border-radius:0 0 var(--r) var(--r);border-top:none;}
+
+  /* config */
+  .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .cfg-card{padding:18px 20px;}
+  .cfg-card h4{margin:0 0 12px;font-size:13.5px;font-weight:600;}
+  .cfg-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--border);gap:10px;}
+  .cfg-row:last-child{border-bottom:none;}
+  .cfg-row .k{font-size:12.5px;}
+  .cfg-row .v{font-size:11.5px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;}
+
+  .empty{text-align:center;padding:44px 20px;color:var(--text-mute);font-size:13px;}
+
+  /* ============ REVIEW MODULE ============ */
+  .rev-split{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;min-height:520px;}
+  .rev-doc{background:var(--bg2);padding:20px;display:flex;flex-direction:column;border-right:1px solid var(--border);}
+  .rev-doc .rev-tab-bar{display:flex;gap:2px;margin-bottom:14px;}
+  .rev-doc .rev-tab{
+    padding:7px 14px;font-size:12px;font-weight:600;border-radius:var(--r-sm) var(--r-sm) 0 0;
+    cursor:pointer;border:1px solid var(--border);border-bottom:none;background:var(--surface);color:var(--text-dim);
+  }
+  .rev-doc .rev-tab.active{background:var(--surface2);color:var(--emerald);border-color:var(--border-hi);}
+  .rev-doc-paper{
+    flex:1;background:#F4F2EC;color:#2A2A26;border-radius:8px;padding:20px 18px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;
+    overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.35);position:relative;
+  }
+  .rev-doc-paper.blurry{filter:blur(1.6px);}
+  .rev-doc-paper .dp-head{font-weight:700;font-size:12px;border-bottom:1px solid #C9C5B8;padding-bottom:8px;margin-bottom:8px;}
+  .rev-doc-paper .dp-row{display:flex;justify-content:space-between;gap:8px;}
+  .rev-doc-paper .dp-total{border-top:1px dashed #C9C5B8;margin-top:8px;padding-top:8px;font-weight:700;font-size:11.5px;}
+  .rev-doc-meta{margin-top:12px;font-size:11px;color:var(--text-mute);display:flex;gap:14px;flex-wrap:wrap;}
+  .rev-form{background:var(--surface);padding:22px;overflow-y:auto;}
+  .rev-form-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap;}
+  .rev-form-head h3{font-size:15px;margin:0;font-weight:700;}
+  .rev-alert{
+    display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-radius:var(--r-sm);
+    margin-bottom:16px;font-size:12.5px;
+  }
+  .rev-alert.err{background:var(--coral-glow);border:1px solid rgba(251,113,133,0.3);color:var(--coral);}
+  .rev-alert.warn{background:var(--amber-glow);border:1px solid rgba(251,191,36,0.3);color:var(--amber);}
+  .rev-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+  .rev-field label{display:block;font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-mute);font-weight:600;margin-bottom:5px;}
+  .rev-field input,.rev-field select{
+    width:100%;padding:9px 11px;border-radius:var(--r-sm);
+    background:var(--bg2);border:1px solid var(--border);
+    color:var(--text);font-size:13px;font-family:'JetBrains Mono',monospace;outline:none;
+    transition:border-color .15s;
+  }
+  .rev-field input:focus{border-color:var(--emerald-deep);box-shadow:0 0 0 3px var(--emerald-glow);}
+  .rev-field.has-err input{border-color:var(--coral);background:rgba(251,113,133,0.06);}
+  .rev-field.has-err label{color:var(--coral);}
+  .rev-field.full{grid-column:1/-1;}
+  .rev-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;align-items:center;}
+  .rev-actions .fspacer{flex:1;}
+
+  /* human-corrected tag */
+  .chip.corrected{background:rgba(34,211,238,0.12);color:var(--cyan);}
+  .corrected-tag{
+    display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;
+    padding:2px 8px;border-radius:20px;background:rgba(34,211,238,0.12);color:var(--cyan);
+    font-family:'JetBrains Mono',monospace;letter-spacing:0.03em;
+  }
+
+  /* ============ ARCHIVO DRIVE ============ */
+  .drive-tree{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+  .drive-folder{
+    display:flex;align-items:center;gap:10px;padding:12px 18px;
+    border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;
+  }
+  .drive-folder:hover{background:var(--surface2);}
+  .drive-folder:last-child{border-bottom:none;}
+  .drive-folder .df-icon{font-size:18px;width:24px;text-align:center;}
+  .drive-folder .df-name{font-weight:600;font-size:13px;}
+  .drive-folder .df-count{margin-left:auto;font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;}
+  .drive-files{background:var(--bg2);border-bottom:1px solid var(--border);}
+  .drive-file{
+    display:flex;align-items:center;gap:10px;padding:9px 18px 9px 50px;
+    border-bottom:1px solid var(--border);font-size:12.5px;
+  }
+  .drive-file:last-child{border-bottom:none;}
+  .drive-file .ff-icon{color:var(--coral);font-size:14px;width:18px;text-align:center;}
+  .drive-file .ff-name{font-family:'JetBrains Mono',monospace;color:var(--text-dim);font-size:12px;}
+  .drive-file .ff-date{margin-left:auto;font-size:11px;color:var(--text-mute);}
+
+  /* ============ REPORT TOOLBAR ============ */
+  .report-toolbar{display:flex;gap:8px;flex-wrap:wrap;}
+  .report-toolbar .btn-ghost{padding:7px 13px;font-size:11.5px;}
+
+  /* ============ CONCILIACIÓN BANCARIA ============ */
+  .conc-upload-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;}
+  .conc-upload-card{padding:24px 22px;display:flex;flex-direction:column;}
+  .conc-upload-card h4{margin:0 0 4px;font-size:14px;font-weight:700;}
+  .conc-upload-card .sub{font-size:12px;color:var(--text-dim);margin-bottom:16px;}
+  .conc-dropzone{
+    flex:1;border:2px dashed var(--border-hi);border-radius:var(--r);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    padding:28px 20px;cursor:pointer;transition:border-color .15s,background .15s;min-height:160px;
+    text-align:center;
+  }
+  .conc-dropzone:hover{border-color:var(--emerald);background:var(--emerald-glow);}
+  .conc-dropzone.loaded{border-color:var(--emerald-deep);border-style:solid;background:var(--emerald-glow);}
+  .conc-dropzone .dz-icon{font-size:32px;opacity:.6;}
+  .conc-dropzone .dz-text{font-size:12.5px;color:var(--text-dim);}
+  .conc-dropzone .dz-file{
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--emerald);font-weight:600;
+    display:flex;align-items:center;gap:6px;
+  }
+  .conc-divider{
+    display:flex;align-items:center;justify-content:center;width:50px;
+    font-size:20px;color:var(--text-mute);
+  }
+  .conc-divider span{
+    writing-mode:vertical-rl;text-orientation:mixed;
+    font-size:11px;font-weight:600;letter-spacing:0.1em;color:var(--border-hi);
+  }
+  .conc-start{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    padding:20px;margin-top:18px;flex-wrap:wrap;
+  }
+  .conc-period{
+    display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-dim);
+  }
+  .conc-period select{
+    padding:8px 10px;border-radius:var(--r-sm);background:var(--surface);
+    border:1px solid var(--border);color:var(--text);font-size:12.5px;font-family:'Inter',sans-serif;
+  }
+
+  /* processing animation */
+  .conc-processing{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:60px 20px;gap:18px;
+  }
+  .conc-spinner{
+    width:56px;height:56px;border:3px solid var(--border-hi);border-top-color:var(--emerald);
+    border-radius:50%;animation:rot 1s linear infinite;
+  }
+  .conc-proc-status{font-size:13px;color:var(--text-dim);text-align:center;}
+  .conc-proc-steps{display:flex;flex-direction:column;gap:6px;margin-top:8px;width:300px;}
+  .conc-proc-step{
+    display:flex;align-items:center;gap:9px;font-size:12px;padding:5px 0;
+    color:var(--text-mute);transition:color .3s;
+  }
+  .conc-proc-step.active{color:var(--emerald);}
+  .conc-proc-step.done{color:var(--text-dim);}
+  .conc-proc-step .ps-dot{
+    width:18px;height:18px;border-radius:50%;flex-shrink:0;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg2);border:1px solid var(--border);transition:all .3s;
+  }
+  .conc-proc-step.active .ps-dot{background:var(--emerald-glow);border-color:var(--emerald);color:var(--emerald);}
+  .conc-proc-step.done .ps-dot{background:var(--emerald-glow);border-color:var(--emerald-deep);color:var(--emerald);}
+
+  /* results */
+  .conc-result-header{
+    display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:center;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:18px 22px;margin-bottom:18px;
+  }
+  .conc-rh-side{text-align:center;}
+  .conc-rh-side .rh-label{font-size:10.5px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-mute);font-weight:600;margin-bottom:4px;}
+  .conc-rh-side .rh-val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;}
+  .conc-rh-mid{
+    text-align:center;padding:0 20px;
+  }
+  .conc-rh-diff{
+    font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;
+  }
+  .conc-rh-diff.zero{color:var(--emerald);}
+  .conc-rh-diff.nonzero{color:var(--coral);}
+
+  .conc-match-grid{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;margin-bottom:18px;}
+  .conc-col{background:var(--surface);border:1px solid var(--border);}
+  .conc-col:first-child{border-radius:var(--r) 0 0 var(--r);border-right:none;}
+  .conc-col:last-child{border-radius:0 var(--r) var(--r) 0;border-left:none;}
+  .conc-col-head{
+    padding:12px 16px;border-bottom:1px solid var(--border-hi);
+    font-size:12px;font-weight:700;letter-spacing:0.04em;
+    display:flex;align-items:center;gap:8px;
+  }
+  .conc-col-head .ch-icon{font-size:16px;}
+  .conc-tx{
+    padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+    transition:background .12s;min-height:44px;
+  }
+  .conc-tx:last-child{border-bottom:none;}
+  .conc-tx:hover{background:var(--surface2);}
+  .conc-tx .tx-desc{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-dim);}
+  .conc-tx .tx-date{font-size:11px;color:var(--text-mute);flex-shrink:0;width:46px;}
+  .conc-tx .tx-amt{
+    font-family:'JetBrains Mono',monospace;font-weight:600;font-size:12px;
+    flex-shrink:0;text-align:right;min-width:90px;
+  }
+  .conc-tx.matched{background:rgba(52,211,153,0.04);}
+  .conc-tx.matched .tx-amt{color:var(--emerald);}
+  .conc-tx.unmatched{background:rgba(251,113,133,0.04);}
+  .conc-tx.unmatched .tx-amt{color:var(--coral);}
+  .conc-tx.partial{background:rgba(251,191,36,0.04);}
+  .conc-tx.partial .tx-amt{color:var(--amber);}
+  .conc-tx.empty-slot{opacity:.3;justify-content:center;color:var(--text-mute);font-style:italic;font-size:11px;}
+  .conc-links{
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    padding-top:46px;
+  }
+  .conc-link{
+    height:44px;display:flex;align-items:center;justify-content:center;font-size:12px;
+  }
+  .conc-link.matched{color:var(--emerald);}
+  .conc-link.unmatched{color:var(--coral);font-size:10px;}
+  .conc-link.partial{color:var(--amber);}
+
+  .conc-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  .conc-stat{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:16px 18px;text-align:center;
+  }
+  .conc-stat .cs-val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin:6px 0 2px;}
+  .conc-stat .cs-lbl{font-size:11px;color:var(--text-dim);letter-spacing:0.04em;text-transform:uppercase;font-weight:600;}
+
+  .conc-report{
+    background:var(--surface);border:1px solid var(--border-hi);border-radius:var(--r);overflow:hidden;
+    max-width:800px;
+  }
+  .conc-report-head{
+    background:var(--bg2);padding:20px 24px;border-bottom:1px solid var(--border);
+  }
+  .conc-report-head h3{margin:0 0 2px;font-size:17px;}
+  .conc-report-head .sub{font-size:12px;color:var(--text-dim);}
+  .conc-report-body{padding:24px;}
+  .conc-report-section{margin-bottom:20px;}
+  .conc-report-section h5{
+    font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-mute);
+    font-weight:700;margin:0 0 10px;padding-bottom:6px;border-bottom:1px dashed var(--border);
+  }
+  .conc-report-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:7px 0;font-size:13px;border-bottom:1px solid var(--border);
+  }
+  .conc-report-row:last-child{border-bottom:none;}
+  .conc-report-row .rr-val{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;}
+  .conc-report-total{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 0;font-size:14px;font-weight:700;
+    border-top:2px solid var(--border-hi);margin-top:6px;
+  }
+  .conc-report-total .rr-val{font-family:'Space Grotesk',sans-serif;font-size:18px;}
+
+  /* ============ DGII 606/607/608 ============ */
+  .dgii-tabs{display:flex;gap:2px;margin-bottom:18px;}
+  .dgii-tab{
+    padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;
+    border:1px solid var(--border);border-bottom:none;border-radius:var(--r-sm) var(--r-sm) 0 0;
+    background:var(--surface);color:var(--text-dim);transition:all .12s;
+  }
+  .dgii-tab.active{background:var(--emerald-glow);color:var(--emerald);border-color:var(--emerald-deep);}
+  .dgii-tab .dt-count{
+    font-size:10px;font-weight:700;margin-left:6px;padding:1px 6px;border-radius:10px;
+    background:var(--bg2);
+  }
+  .dgii-tab.active .dt-count{background:rgba(52,211,153,0.25);}
+  .dgii-preview{
+    background:var(--surface);border:1px solid var(--border);border-radius:0 var(--r) var(--r) var(--r);
+    overflow-x:auto;
+  }
+  .dgii-preview table{min-width:900px;}
+  .dgii-preview thead th{
+    background:var(--bg2);font-size:9.5px;padding:8px 8px;letter-spacing:0.05em;
+    white-space:nowrap;text-align:center;
+  }
+  .dgii-preview tbody td{
+    font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 8px;
+    text-align:center;white-space:nowrap;
+  }
+  .dgii-ready{
+    display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:var(--r);
+    font-size:13px;font-weight:600;margin-bottom:16px;
+  }
+  .dgii-ready.ok{background:var(--emerald-glow);border:1px solid rgba(52,211,153,0.3);color:var(--emerald);}
+  .dgii-ready.partial{background:var(--amber-glow);border:1px solid rgba(251,191,36,0.3);color:var(--amber);}
+  .dgii-filename{
+    font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--bg2);
+    border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 14px;color:var(--text-dim);
+    display:inline-flex;align-items:center;gap:8px;margin-right:10px;
+  }
+
+  /* ============ NCF CONTROL ============ */
+  .ncf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+  .ncf-card-seq{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:18px;position:relative;overflow:hidden;
+  }
+  .ncf-card-seq::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--ncc,var(--emerald));}
+  .ncf-type{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px;}
+  .ncf-desc{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+  .ncf-bar-track{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+  .ncf-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.2,.8,.2,1);}
+  .ncf-stats{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-dim);}
+  .ncf-stats b{color:var(--text);font-weight:600;}
+  .ncf-alert{
+    margin-top:10px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;
+    display:inline-flex;align-items:center;gap:5px;
+  }
+  .ncf-alert.ok{background:var(--emerald-glow);color:var(--emerald);}
+  .ncf-alert.warn{background:var(--amber-glow);color:var(--amber);}
+  .ncf-alert.crit{background:var(--coral-glow);color:var(--coral);}
+
+  /* ============ CHECKLIST CIERRE ============ */
+  .ck-progress{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;
+  }
+  .ck-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
+  .ck-ring svg{transform:rotate(-90deg);}
+  .ck-ring .ck-pct{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;
+  }
+  .ck-info h3{margin:0 0 3px;font-size:16px;}
+  .ck-info .sub{font-size:12.5px;color:var(--text-dim);}
+  .ck-section{margin-bottom:18px;}
+  .ck-section-head{
+    font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-mute);
+    font-weight:700;margin-bottom:8px;padding-bottom:5px;border-bottom:1px dashed var(--border);
+  }
+  .ck-item{
+    display:flex;align-items:center;gap:12px;padding:10px 14px;
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);
+    margin-bottom:6px;transition:border-color .12s;
+  }
+  .ck-item.done{border-color:rgba(52,211,153,0.3);}
+  .ck-item.blocked{border-color:rgba(251,113,133,0.3);}
+  .ck-check{
+    width:22px;height:22px;border-radius:50%;flex-shrink:0;font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--border-hi);color:var(--text-mute);
+  }
+  .ck-item.done .ck-check{background:var(--emerald-glow);border-color:var(--emerald);color:var(--emerald);}
+  .ck-item.blocked .ck-check{background:var(--coral-glow);border-color:var(--coral);color:var(--coral);}
+  .ck-label{flex:1;font-size:13px;}
+  .ck-item.done .ck-label{color:var(--text-dim);}
+  .ck-reason{font-size:11px;color:var(--coral);margin-top:1px;}
+
+  /* ============ MULTI-EMPRESA ============ */
+  .me-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+  .me-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+    padding:20px;position:relative;overflow:hidden;
+  }
+  .me-card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--mec,var(--emerald));}
+  .me-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .me-card-head h4{margin:0;font-size:14px;}
+  .me-card-head .me-status{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;}
+  .me-card-head .me-status.ok{background:var(--emerald-glow);color:var(--emerald);}
+  .me-card-head .me-status.warn{background:var(--amber-glow);color:var(--amber);}
+  .me-card-head .me-status.late{background:var(--coral-glow);color:var(--coral);}
+  .me-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .me-metric{padding:8px 10px;background:var(--bg2);border-radius:var(--r-sm);}
+  .me-metric .mm-val{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;}
+  .me-metric .mm-lbl{font-size:10px;color:var(--text-mute);letter-spacing:0.05em;text-transform:uppercase;}
+  .me-checks{display:flex;flex-wrap:wrap;gap:6px;}
+  .me-ck{
+    font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:6px;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+  .me-ck.done{background:var(--emerald-glow);color:var(--emerald);}
+  .me-ck.pend{background:var(--amber-glow);color:var(--amber);}
+  .me-ck.miss{background:var(--coral-glow);color:var(--coral);}
+
+  /* ============ PRINT ============ */
+  @media print{
+    body{background:#fff !important;color:#111 !important;font-size:11px;}
+    .sidebar,#tour-spot,#tour-bubble,#tour-launcher,#toast-zone,.demo-badge,.report-toolbar,.btn-solid,.btn-ghost,.sb-logout,.filters{display:none !important;}
+    #app.active{display:block !important;}
+    .main{padding:10px !important;max-width:100% !important;}
+    .kpi-grid{grid-template-columns:repeat(4,1fr);}
+    .kpi{border:1px solid #ddd;background:#fff !important;}
+    .kpi .val{color:#111 !important;}
+    .card,.surface,.surface2{background:#fff !important;border-color:#ddd !important;}
+    table{font-size:10px;}
+    thead th{background:#f4f4f4 !important;color:#333 !important;}
+    .sheet td,.sheet th{border-color:#ccc !important;}
+    .daily-mail{border:1px solid #ccc;background:#fff !important;}
+    .dm-head{background:#f4f4f4 !important;}
+  }
+
+  /* ============ VISITA GUIADA ============ */
+  #tour-spot{
+    position:fixed;z-index:300;pointer-events:none;border-radius:14px;display:none;
+    box-shadow:0 0 0 200vmax rgba(4,7,6,0.78), 0 0 0 2px var(--emerald), 0 0 34px rgba(52,211,153,0.35);
+    transition:top .45s cubic-bezier(.2,.8,.2,1), left .45s cubic-bezier(.2,.8,.2,1),
+               width .45s cubic-bezier(.2,.8,.2,1), height .45s cubic-bezier(.2,.8,.2,1);
+  }
+  #tour-spot.on{display:block;}
+  #tour-bubble{
+    position:fixed;z-index:310;width:min(370px,calc(100vw - 32px));display:none;
+    background:linear-gradient(180deg,var(--surface2),var(--surface));
+    border:1px solid var(--border-hi);border-radius:16px;padding:16px 18px 14px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.65);
+    transition:top .45s cubic-bezier(.2,.8,.2,1), left .45s cubic-bezier(.2,.8,.2,1);
+  }
+  #tour-bubble.on{display:block;}
+  .tour-guide{display:flex;gap:11px;align-items:center;margin-bottom:10px;}
+  .tour-avatar{
+    width:40px;height:40px;border-radius:50%;flex-shrink:0;font-size:19px;
+    background:radial-gradient(circle at 30% 30%, #6EE7B7, var(--emerald-deep));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 20px rgba(52,211,153,0.5);animation:bob 3s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+  .tour-name{font-weight:700;font-size:13px;}
+  .tour-step-n{font-size:10.5px;color:var(--text-mute);letter-spacing:0.05em;text-transform:uppercase;}
+  .tour-title{font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:700;margin:0 0 5px;}
+  .tour-text{font-size:12.8px;color:var(--text-dim);line-height:1.6;}
+  .tour-ctrl{display:flex;gap:8px;margin-top:14px;align-items:center;}
+  .tour-ctrl .btn-solid,.tour-ctrl .btn-ghost{padding:8px 14px;font-size:12px;}
+  .tour-skip{margin-left:auto;background:none;border:none;color:var(--text-mute);font-size:11.5px;cursor:pointer;font-family:'Inter',sans-serif;}
+  .tour-skip:hover{color:var(--coral);}
+  .tour-progress{height:3px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:13px;}
+  .tour-progress b{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--emerald-deep),var(--emerald));transition:width .35s;}
+  #tour-launcher{
+    position:fixed;bottom:22px;left:22px;z-index:150;display:none;
+    align-items:center;gap:8px;cursor:pointer;
+    background:linear-gradient(135deg,var(--emerald),var(--emerald-deep));color:#052E22;
+    border:none;border-radius:30px;padding:11px 18px;font-weight:700;font-size:13px;
+    font-family:'Inter',sans-serif;box-shadow:0 8px 30px rgba(16,185,129,0.35);
+    transition:transform .12s;
+  }
+  #tour-launcher.show{display:inline-flex;}
+  #tour-launcher:hover{transform:translateY(-2px);}
+
+  @media (max-width:980px){
+    #app.active{display:block;}
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;width:260px;z-index:250;
+      transform:translateX(-100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);
+      height:100vh;overflow-y:auto;
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sb-overlay{
+      display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:240;
+    }
+    .sb-overlay.open{display:block;}
+    .mob-topbar{
+      display:flex !important;align-items:center;gap:12px;
+      background:var(--bg2);border-bottom:1px solid var(--border);
+      padding:10px 16px;position:sticky;top:0;z-index:100;
+    }
+    .mob-topbar .mob-menu{
+      width:36px;height:36px;border-radius:var(--r-sm);border:1px solid var(--border);
+      background:var(--surface);color:var(--text);font-size:18px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .mob-topbar .mob-brand{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;}
+    .mob-topbar .mob-user{
+      margin-left:auto;font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:6px;
+    }
+    .mob-topbar .mob-logout{
+      width:32px;height:32px;border-radius:var(--r-sm);border:1px solid rgba(251,113,133,0.2);
+      background:rgba(251,113,133,0.06);color:var(--coral);font-size:14px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .grid-2,.grid-32,.cfg-grid,.proc-grid{grid-template-columns:1fr;}
+    .pipeline{grid-template-columns:1fr;gap:6px;}
+    .pl-arrow{transform:rotate(90deg);justify-content:center;}
+    .login-wrap{grid-template-columns:1fr;gap:24px;}
+    .login-pitch h1{font-size:28px;}
+    .login-pitch{text-align:center;}
+    .login-pitch p{margin:0 auto;}
+    .pitch-flow{justify-content:center;}
+    .main{padding:16px 14px 70px;}
+    .main-header{flex-direction:column;gap:8px;}
+    .main-header h2{font-size:20px;}
+    .sheet{min-width:760px;}
+    table{display:block;overflow-x:auto;}
+    .rev-split{grid-template-columns:1fr;}
+    .rev-doc{border-right:none;border-bottom:1px solid var(--border);}
+    .conc-upload-grid{grid-template-columns:1fr;}
+    .conc-divider{height:40px;width:100%;writing-mode:horizontal-tb;}
+    .conc-divider span{writing-mode:horizontal-tb;}
+    .conc-match-grid{grid-template-columns:1fr;gap:12px;}
+    .conc-links{display:none;}
+    .conc-col:first-child,.conc-col:last-child{border-radius:var(--r);}
+    .conc-col{border:1px solid var(--border)!important;}
+    .conc-result-header{grid-template-columns:1fr;gap:14px;text-align:center;}
+    .conc-summary-grid{grid-template-columns:1fr 1fr;}
+    .me-grid{grid-template-columns:1fr;}
+    .ncf-grid{grid-template-columns:1fr;}
+    .dgii-tabs{overflow-x:auto;flex-wrap:nowrap;}
+    .filters{gap:6px;}
+    .filters select,.filters input[type=text]{flex:1;min-width:0;font-size:12px;}
+    .report-toolbar{width:100%;}
+    .report-toolbar .btn-ghost{flex:1;justify-content:center;}
+    .demo-badge{font-size:10px;padding:3px 8px;}
+    #tour-bubble{width:calc(100vw - 24px);bottom:12px;left:12px;position:fixed;top:auto !important;}
+    #tour-launcher{bottom:16px;left:12px;font-size:12px;padding:9px 14px;}
+  }
+  @media (max-width:440px){
+    .kpi-grid{grid-template-columns:1fr;}
+    .conc-summary-grid{grid-template-columns:1fr;}
+    .kpi .val{font-size:22px;}
+    .login-card{padding:24px 18px 20px;}
+    .login-pitch h1{font-size:24px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001s !important;transition-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen">
+  <div class="login-grid-bg"></div>
+  <div class="login-wrap">
+    <div class="login-pitch">
+      <h1>Del caos documental<br>al dato <span class="accent">listo para contabilizar</span>.</h1>
+      <p>ContaFlow recibe facturas desorganizadas, las lee con IA, valida NCF, RNC e ITBIS, y entrega todo estructurado a tu equipo contable.</p>
+      <div class="pitch-flow">
+        <div class="pitch-step"><span class="dot"></span>Documento entra</div>
+        <span class="pitch-arrow">→</span>
+        <div class="pitch-step"><span class="dot"></span>IA extrae y valida</div>
+        <span class="pitch-arrow">→</span>
+        <div class="pitch-step"><span class="dot"></span>Equipo recibe datos limpios</div>
+      </div>
+    </div>
+    <div class="login-card">
+      <div class="brand">
+        <div class="mark">CF</div>
+        <div>
+          <div class="bname">ContaFlow</div>
+          <div class="btag">por Debotia · Demo</div>
+        </div>
+      </div>
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
+      <form onsubmit="return false;">
+        <div class="field">
+          <label for="l-emp">Empresa</label>
+          <select id="l-emp"><option>Contable Rosales &amp; Asociados — DEMO</option></select>
+        </div>
+        <div class="field">
+          <label for="l-user">Usuario</label>
+          <input id="l-user" type="text" placeholder="ej. ana.rosales" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="l-pass">Contraseña</label>
+          <input id="l-pass" type="password" placeholder="••••••••" autocomplete="off">
+        </div>
+        <button class="btn-primary" onclick="attemptLogin()">Entrar a ContaFlow</button>
+      </form>
+      <div class="login-users">
+        <div class="t">Usuarios de prueba — clic para autocompletar</div>
+        <div class="u-chip" onclick="fillLogin('ana.rosales')"><span>Ana Rosales</span><span class="rle admin">Admin</span></div>
+        <div class="u-chip" onclick="fillLogin('pedro.duran')"><span>Pedro Durán</span><span class="rle oper">Operativo</span></div>
+        <div class="u-chip" onclick="fillLogin('maria.checo')"><span>María Checo</span><span class="rle oper">Operativo</span></div>
+        <div class="u-chip" onclick="fillLogin('director')"><span>Ramón Objío</span><span class="rle ger">Gerencial</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand" style="padding:0 4px;">
+      <div class="mark">CF</div>
+      <div>
+        <div class="bname" style="font-size:16px;">ContaFlow</div>
+        <div class="btag">Demo</div>
+      </div>
+    </div>
+    <div class="sb-company">
+      <div class="cn">Contable Rosales &amp; Asoc.</div>
+      <div>Empresa demo · Julio 2026</div>
+    </div>
+    <ul class="sb-nav" id="sb-nav"></ul>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="av" id="sb-av">AR</div>
+        <div>
+          <div class="name" id="sb-name">—</div>
+          <div class="role" id="sb-role">—</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">⏻ Cerrar sesión</button>
+    </div>
+  </aside>
+  <div class="sb-overlay" id="sb-overlay" onclick="closeMobileMenu()"></div>
+  <div class="mob-topbar" id="mob-topbar">
+    <button class="mob-menu" onclick="toggleMobileMenu()">☰</button>
+    <span class="mob-brand">ContaFlow</span>
+    <span class="mob-user"><span id="mob-name"></span></span>
+    <button class="mob-logout" onclick="logout()" title="Cerrar sesión">⏻</button>
+  </div>
+  <main class="main" id="main-content"></main>
+</div>
+
+<div id="toast-zone"></div>
+
+<!-- ============ VISITA GUIADA ============ -->
+<div id="tour-spot"></div>
+<div id="tour-bubble" role="dialog" aria-live="polite" aria-label="Visita guiada">
+  <div class="tour-guide">
+    <div class="tour-avatar">🧭</div>
+    <div>
+      <div class="tour-name">Flow — tu guía</div>
+      <div class="tour-step-n" id="tour-count"></div>
+    </div>
+  </div>
+  <div class="tour-title" id="tour-title"></div>
+  <div class="tour-text" id="tour-text"></div>
+  <div class="tour-ctrl">
+    <button class="btn-ghost" id="tour-prev" onclick="tourPrev()">← Atrás</button>
+    <button class="btn-solid" id="tour-next" onclick="tourNext()">Siguiente →</button>
+    <button class="tour-skip" onclick="endTour()">Saltar visita</button>
+  </div>
+  <div class="tour-progress"><b id="tour-bar"></b></div>
+</div>
+<button id="tour-launcher" onclick="startTour()">🧭 Repetir visita guiada</button>
+
+<script>
+/* ========================================================= */
+/* DATOS FICTICIOS — todo con prefijo DEMO_ para limpieza    */
+/* ========================================================= */
+const USERS = {
+  'ana.rosales': {pass:'demo123', name:'Ana Rosales', role:'admin', area:'Facturas de proveedores', initials:'AR'},
+  'pedro.duran': {pass:'demo123', name:'Pedro Durán', role:'operativo', area:'Gastos operativos y combustible', initials:'PD'},
+  'maria.checo': {pass:'demo123', name:'María Checo', role:'operativo', area:'Nómina y TSS', initials:'MC'},
+  'director':    {pass:'demo123', name:'Ramón Objío', role:'gerencial', area:'Dirección general', initials:'RO'}
+};
+const ROLE_LABEL = {admin:'Admin', operativo:'Operativo', gerencial:'Gerencial · Solo lectura'};
+
+let DOCS = [
+  {id:'DOC-0231', proveedor:'DEMO_Ferretería Ovando SRL', tipo:'Factura', fecha:'2026-07-08', ncf:'B0100004521', rnc:'130245871', subtotal:7161.02, itbis:1288.98, total:8450.00, pago:'Transferencia', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0232', proveedor:'DEMO_Combustibles Duarte', tipo:'Factura', fecha:'2026-07-08', ncf:'B0200011932', rnc:'101889234', subtotal:4406.78, itbis:793.22, total:5200.00, pago:'Efectivo', categoria:'Combustible', centro:'Logística', area:'Pedro Durán', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0233', proveedor:'DEMO_Suplidora Caribe', tipo:'Factura', fecha:'2026-07-07', ncf:'B01000X4521', rnc:'130245871', subtotal:2626.95, itbis:473.05, total:3100.00, pago:'Crédito', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', estado:'err', obs:'NCF con formato inválido — contiene carácter no numérico', correctedBy:null},
+  {id:'DOC-0234', proveedor:'DEMO_Papelería Central', tipo:'Recibo', fecha:'2026-07-07', ncf:'B0100004522', rnc:'13024587', subtotal:1059.32, itbis:190.68, total:1250.00, pago:'Efectivo', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', estado:'err', obs:'RNC con 8 dígitos — se esperan 9', correctedBy:null},
+  {id:'DOC-0235', proveedor:'DEMO_Ferretería Ovando SRL', tipo:'Factura', fecha:'2026-07-08', ncf:'B0100004521', rnc:'130245871', subtotal:7161.02, itbis:1288.98, total:8450.00, pago:'Transferencia', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', estado:'err', obs:'Posible duplicado de DOC-0231 — mismo proveedor, monto y fecha', correctedBy:null},
+  {id:'DOC-0236', proveedor:'DEMO_Servicios TSS Norte', tipo:'Comprobante', fecha:'2026-07-06', ncf:'—', rnc:'401567823', subtotal:14200.00, itbis:0, total:14200.00, pago:'Transferencia', categoria:'Nómina', centro:'RRHH', area:'María Checo', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0237', proveedor:'DEMO_Distribuidora Los Almácigos', tipo:'Factura', fecha:'2026-07-06', ncf:'B1400003310', rnc:'132908765', subtotal:5745.84, itbis:1034.66, total:6780.50, pago:'Crédito', categoria:'Materia prima', centro:'Operaciones', area:'Ana Rosales', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0238', proveedor:'DEMO_Copiadora Rápida EIRL', tipo:'Recibo', fecha:'2026-07-05', ncf:'E310000198', rnc:'132445509', subtotal:754.24, itbis:135.76, total:890.00, pago:'Efectivo', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0239', proveedor:'DEMO_Combustibles Duarte', tipo:'Factura', fecha:'2026-07-05', ncf:'B0200011933', rnc:'101889234', subtotal:4050.85, itbis:729.15, total:4780.00, pago:'Efectivo', categoria:'Combustible', centro:'Logística', area:'Pedro Durán', estado:'warn', obs:'Imagen borrosa — verificar monto manualmente', correctedBy:null},
+  {id:'DOC-0240', proveedor:'DEMO_Importadora Cibao Corp', tipo:'Factura', fecha:'2026-07-04', ncf:'B0100004498', rnc:'130201456', subtotal:18982.03, itbis:3417.97, total:22400.00, pago:'Transferencia', categoria:'Equipos', centro:'Operaciones', area:'Ana Rosales', estado:'ok', obs:null, correctedBy:null},
+  {id:'DOC-0241', proveedor:'DEMO_Nómina Julio Q1', tipo:'Comprobante', fecha:'2026-07-04', ncf:'—', rnc:'—', subtotal:0, itbis:0, total:0, pago:'—', categoria:'Nómina', centro:'RRHH', area:'María Checo', estado:'warn', obs:'Falta soporte de horas extra de 2 empleados', correctedBy:null},
+  {id:'DOC-0242', proveedor:'DEMO_Taller Mecánico Belén', tipo:'Factura', fecha:'2026-07-03', ncf:'B0100004230', rnc:'130876541', subtotal:3347.46, itbis:602.54, total:3950.00, pago:'Efectivo', categoria:'Combustible', centro:'Logística', area:'Pedro Durán', estado:'ok', obs:null, correctedBy:null},
+];
+
+const MAILS = [
+  {from:'DEMO_Suplidora Caribe', mail:'ventas@suplidoracaribe-demo.do', subj:'Factura julio — pedido #4482', att:['factura_4482.pdf'], to:'facturas@', resp:'Ana Rosales', time:'09:42'},
+  {from:'DEMO_Combustibles Duarte', mail:'admin@cduarte-demo.do', subj:'Comprobante despacho combustible', att:['despacho_0708.jpg'], to:'compras@', resp:'Pedro Durán', time:'08:17'},
+  {from:'DEMO_Servicios TSS Norte', mail:'noreply@tssnorte-demo.do', subj:'Comprobante de pago TSS junio', att:['tss_junio.pdf'], to:'nomina@', resp:'María Checo', time:'Ayer'},
+  {from:'DEMO_Importadora Cibao Corp', mail:'facturacion@icibao-demo.do', subj:'FACT B0100004498 equipos', att:['B0100004498.pdf','anexo_garantia.pdf'], to:'facturas@', resp:'Ana Rosales', time:'Ayer'},
+];
+
+/* documentos que llegan "nuevos" al simulador de extracción */
+const INCOMING = [
+  {proveedor:'DEMO_Colmado El Progreso', tipo:'Factura', fecha:'2026-07-09', ncf:'B0200018841', rnc:'131557092', subtotal:2118.64, itbis:381.36, total:2500.00, pago:'Efectivo', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', fail:null},
+  {proveedor:'DEMO_Transporte Yaque SRL', tipo:'Factura', fecha:'2026-07-09', ncf:'B010000', rnc:'130998812', subtotal:5932.20, itbis:1067.80, total:7000.00, pago:'Transferencia', categoria:'Combustible', centro:'Logística', area:'Pedro Durán', fail:'ncf'},
+  {proveedor:'DEMO_Oficentro Mella', tipo:'Recibo', fecha:'2026-07-09', ncf:'B0100007723', rnc:'1309', subtotal:1271.19, itbis:228.81, total:1500.00, pago:'Efectivo', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', fail:'rnc'},
+  {proveedor:'DEMO_Agua Cristal del Este', tipo:'Factura', fecha:'2026-07-09', ncf:'B0200019554', rnc:'132664401', subtotal:1610.17, itbis:289.83, total:1900.00, pago:'Efectivo', categoria:'Suministros', centro:'Administración', area:'Ana Rosales', fail:'blur'},
+];
+let incomingIdx = 0;
+let nextDocNum = 243;
+let processing = false;
+
+/* datos de conciliación bancaria */
+const BANK_TXS = [
+  {id:'BK-001', fecha:'07/01', desc:'Depósito cheque #4401 — DEMO_Distribuidora Los Almácigos', monto:45000.00, tipo:'credito'},
+  {id:'BK-002', fecha:'07/01', desc:'Cargo automático — Seguro médico ARS Humano', monto:-8500.00, tipo:'debito'},
+  {id:'BK-003', fecha:'07/02', desc:'Transferencia recibida — DEMO_Cliente Constructora Norte', monto:125000.00, tipo:'credito'},
+  {id:'BK-004', fecha:'07/02', desc:'Cheque #5521 cobrado — DEMO_Ferretería Ovando SRL', monto:-8450.00, tipo:'debito'},
+  {id:'BK-005', fecha:'07/03', desc:'Comisión bancaria — mantenimiento de cuenta julio', monto:-350.00, tipo:'debito'},
+  {id:'BK-006', fecha:'07/03', desc:'ITBIS s/ comisión bancaria', monto:-63.00, tipo:'debito'},
+  {id:'BK-007', fecha:'07/04', desc:'Transferencia enviada — DEMO_Servicios TSS Norte (nómina)', monto:-14200.00, tipo:'debito'},
+  {id:'BK-008', fecha:'07/05', desc:'Depósito efectivo — recaudación tienda', monto:38750.00, tipo:'credito'},
+  {id:'BK-009', fecha:'07/05', desc:'Pago tarjeta corporativa — DEMO_Combustibles Duarte', monto:-5200.00, tipo:'debito'},
+  {id:'BK-010', fecha:'07/06', desc:'Nota de crédito — devolución comisión duplicada', monto:350.00, tipo:'credito'},
+  {id:'BK-011', fecha:'07/07', desc:'Transferencia enviada — DEMO_Importadora Cibao Corp', monto:-22400.00, tipo:'debito'},
+  {id:'BK-012', fecha:'07/08', desc:'Intereses ganados — cuenta corriente julio', monto:187.50, tipo:'credito'},
+];
+const BOOK_TXS = [
+  {id:'LB-001', fecha:'07/01', desc:'Cobro factura #3887 — DEMO_Distribuidora Los Almácigos', monto:45000.00, tipo:'credito'},
+  {id:'LB-002', fecha:'07/02', desc:'Cobro contrato mensual — DEMO_Cliente Constructora Norte', monto:125000.00, tipo:'credito'},
+  {id:'LB-003', fecha:'07/02', desc:'Pago fact. B0100004521 — DEMO_Ferretería Ovando SRL', monto:-8450.00, tipo:'debito'},
+  {id:'LB-004', fecha:'07/04', desc:'Pago nómina julio Q1 — DEMO_Servicios TSS Norte', monto:-14200.00, tipo:'debito'},
+  {id:'LB-005', fecha:'07/05', desc:'Depósito efectivo — recaudación POS', monto:38750.00, tipo:'credito'},
+  {id:'LB-006', fecha:'07/05', desc:'Pago combustible — DEMO_Combustibles Duarte', monto:-5200.00, tipo:'debito'},
+  {id:'LB-007', fecha:'07/07', desc:'Pago equipo industrial — DEMO_Importadora Cibao Corp', monto:-22400.00, tipo:'debito'},
+  {id:'LB-008', fecha:'07/07', desc:'Cheque #5530 — DEMO_Taller Mecánico Belén', monto:-3950.00, tipo:'debito'},
+  {id:'LB-009', fecha:'07/08', desc:'Cheque #5531 — DEMO_Papelería Central', monto:-1250.00, tipo:'debito'},
+  {id:'LB-010', fecha:'07/08', desc:'Pago seguro médico — ARS Humano (reg. tardío)', monto:-8500.00, tipo:'debito'},
+];
+/* matches precomputados para demo: [bankIdx, bookIdx, tipo] */
+const CONC_MATCHES = [
+  [0, 0, 'exact'],   // depósito Almácigos
+  [1, 9, 'exact'],   // seguro médico
+  [2, 1, 'exact'],   // constructora norte
+  [3, 2, 'exact'],   // ferretería ovando
+  [6, 3, 'exact'],   // TSS nómina
+  [7, 4, 'exact'],   // depósito efectivo
+  [8, 5, 'exact'],   // combustibles duarte
+  [10,6, 'exact'],   // importadora cibao
+];
+/* BK-005,BK-006 = comisiones bancarias no registradas en libros */
+/* BK-010 = nota de crédito no registrada en libros */
+/* BK-012 = intereses ganados no registrados en libros */
+/* LB-008 = cheque Belén emitido pero no cobrado (pendiente banco) */
+/* LB-009 = cheque Papelería emitido pero no cobrado (pendiente banco) */
+let concState = 'upload'; // upload | processing | result
+
+/* Secuencias NCF autorizadas */
+const NCF_SEQS = [
+  {tipo:'B01', nombre:'Crédito Fiscal', desde:'B0100004000', hasta:'B0100005000', usados:521, vence:'2027-03-31', color:'var(--emerald)'},
+  {tipo:'B02', nombre:'Consumidor Final', desde:'B0200010000', hasta:'B0200015000', usados:1933, vence:'2027-03-31', color:'var(--cyan)'},
+  {tipo:'B14', nombre:'Gubernamental', desde:'B1400003000', hasta:'B1400003500', usados:310, vence:'2027-03-31', color:'var(--violet)'},
+  {tipo:'B15', nombre:'Régimen Especial', desde:'B1500000100', hasta:'B1500000300', usados:142, vence:'2026-12-31', color:'var(--amber)'},
+  {tipo:'E31', nombre:'e-CF Electrónico', desde:'E310000001', hasta:'E310000500', usados:198, vence:'2027-06-30', color:'var(--emerald-deep)'},
+];
+
+/* Empresas para el dashboard multi-empresa */
+const EMPRESAS = [
+  {nombre:'Contable Rosales & Asoc.', rnc:'130245871', docs:12, errores:5, itbis:9954.45, gasto:79450.50, conc:'done', f606:'ready', cierre:68, color:'var(--emerald)', status:'ok', statusLabel:'Al día'},
+  {nombre:'Comercial Don Pedro SRL', rnc:'101556789', docs:28, errores:2, itbis:34220.10, gasto:224380.00, conc:'done', f606:'ready', cierre:85, color:'var(--cyan)', status:'ok', statusLabel:'Al día'},
+  {nombre:'Inversiones Tropical SA', rnc:'130889012', docs:8, errores:6, itbis:5100.00, gasto:33500.00, conc:'pending', f606:'blocked', cierre:35, color:'var(--amber)', status:'warn', statusLabel:'Atrasada'},
+  {nombre:'Farmacia Salud Total EIRL', rnc:'132776543', docs:45, errores:0, itbis:78450.20, gasto:514200.00, conc:'done', f606:'ready', cierre:100, color:'var(--violet)', status:'ok', statusLabel:'Cerrada'},
+  {nombre:'Rest. El Buen Sazón SRL', rnc:'130112345', docs:18, errores:8, itbis:12330.55, gasto:81050.00, conc:'pending', f606:'blocked', cierre:22, color:'var(--coral)', status:'late', statusLabel:'Crítica'},
+];
+
+/* ===================== helpers ===================== */
+const $ = id => document.getElementById(id);
+function money(n){return 'RD$' + n.toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function chip(e, doc){
+  if(e==='ok' && doc && doc.correctedBy) return '<span class="chip corrected">✎ Corregido</span>';
+  if(e==='ok') return '<span class="chip ok">Correcto</span>';
+  if(e==='warn') return '<span class="chip warn">Incompleto</span>';
+  return '<span class="chip err">Error</span>';
+}
+function corrTag(doc){
+  if(!doc || !doc.correctedBy) return '';
+  return `<span class="corrected-tag">✎ ${doc.correctedBy}</span>`;
+}
+function demoBadge(){return '<span class="demo-badge"><span class="pulse"></span>Datos ficticios</span>';}
+function toast(title, body){
+  const z = $('toast-zone');
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="tt">🔔 ${title}</div><div class="tb">${body}</div>`;
+  z.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400);}, 4600);
+}
+
+/* ===================== auth ===================== */
+let currentUser = null;
+function fillLogin(u){$('l-user').value=u; $('l-pass').value='demo123';}
+function attemptLogin(){
+  const u=$('l-user').value.trim(), p=$('l-pass').value;
+  const f=USERS[u];
+  if(!f || f.pass!==p){$('login-error').style.display='block';return;}
+  $('login-error').style.display='none';
+  currentUser={username:u,...f};
+  $('login-screen').style.display='none';
+  $('app').classList.add('active');
+  $('sb-name').textContent=currentUser.name;
+  $('sb-role').textContent=ROLE_LABEL[currentUser.role];
+  $('sb-av').textContent=currentUser.initials;
+  if($('mob-name')) $('mob-name').textContent=currentUser.name;
+  buildNav();
+  navigate('panel');
+}
+function logout(){
+  currentUser=null;
+  closeMobileMenu();
+  $('app').classList.remove('active');
+  $('login-screen').style.display='flex';
+  $('l-user').value='';$('l-pass').value='';
+}
+
+function toggleMobileMenu(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  $('sb-overlay').classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.querySelector('.sidebar').classList.remove('open');
+  $('sb-overlay').classList.remove('open');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && $('login-screen').style.display!=='none' && document.activeElement && ['l-user','l-pass'].includes(document.activeElement.id)) attemptLogin();
+});
+
+/* ===================== nav ===================== */
+function navItems(){
+  const probl = DOCS.filter(d=>d.estado!=='ok').length;
+  const pendReview = DOCS.filter(d=>d.estado!=='ok').length;
+  const myPend = DOCS.filter(d=>d.area===currentUser.name&&d.estado!=='ok').length;
+  const base={
+    admin:[
+      {sec:'Operación'},
+      {id:'panel',label:'Panel',ic:'▦'},
+      {id:'procesar',label:'Procesar con IA',ic:'✦'},
+      {id:'revision',label:'Revisión humana',ic:'✎',pill:pendReview||null},
+      {id:'cola',label:'Cola de trabajo',ic:'☰'},
+      {id:'documentos',label:'Documentos',ic:'▤'},
+      {id:'problemas',label:'Con problemas',ic:'△',pill:probl},
+      {sec:'Conciliación'},
+      {id:'conciliacion',label:'Conciliación bancaria',ic:'⇌'},
+      {sec:'Fiscal'},
+      {id:'dgii',label:'Formatos DGII',ic:'⊠'},
+      {id:'ncfcontrol',label:'Control de NCF',ic:'#'},
+      {sec:'Cierre'},
+      {id:'cierre',label:'Checklist cierre',ic:'☑'},
+      {id:'multiempresa',label:'Vista multi-empresa',ic:'◫'},
+      {sec:'Canales'},
+      {id:'correo',label:'Correo monitoreado',ic:'✉'},
+      {id:'salida',label:'Hoja de salida',ic:'⊞'},
+      {id:'resumen',label:'Resumen diario',ic:'◷'},
+      {sec:'Archivo'},
+      {id:'archivo',label:'Repositorio Drive',ic:'☁'},
+      {sec:'Sistema'},
+      {id:'config',label:'Configuración',ic:'⚙'},
+    ],
+    operativo:[
+      {sec:'Operación'},
+      {id:'panel',label:'Panel',ic:'▦'},
+      {id:'procesar',label:'Procesar con IA',ic:'✦'},
+      {id:'revision',label:'Revisión humana',ic:'✎',pill:myPend||null},
+      {id:'cola',label:'Mi cola de trabajo',ic:'☰',pill:myPend||null},
+      {id:'documentos',label:'Documentos',ic:'▤'},
+      {sec:'Conciliación'},
+      {id:'conciliacion',label:'Conciliación bancaria',ic:'⇌'},
+      {sec:'Fiscal'},
+      {id:'dgii',label:'Formatos DGII',ic:'⊠'},
+      {id:'ncfcontrol',label:'Control de NCF',ic:'#'},
+      {sec:'Archivo'},
+      {id:'archivo',label:'Repositorio Drive',ic:'☁'},
+    ],
+    gerencial:[
+      {sec:'Dirección'},
+      {id:'panel',label:'Dashboard ejecutivo',ic:'▦'},
+      {id:'documentos',label:'Documentos',ic:'▤'},
+      {id:'resumen',label:'Resumen diario',ic:'◷'},
+      {id:'salida',label:'Hoja de salida',ic:'⊞'},
+      {sec:'Dirección'},
+      {id:'multiempresa',label:'Vista multi-empresa',ic:'◫'},
+      {sec:'Archivo'},
+      {id:'archivo',label:'Repositorio Drive',ic:'☁'},
+    ]
+  };
+  return base[currentUser.role];
+}
+function buildNav(){
+  $('sb-nav').innerHTML = navItems().map(it=>{
+    if(it.sec) return `<div class="sb-sec">${it.sec}</div>`;
+    return `<li><a data-view="${it.id}" onclick="navigate('${it.id}')"><span class="ic">${it.ic}</span>${it.label}${it.pill?`<span class="pill">${it.pill}</span>`:''}</a></li>`;
+  }).join('');
+}
+function navigate(view){
+  closeMobileMenu();
+  buildNav();
+  document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===view));
+  const m=$('main-content');
+  const R={panel:renderPanel,procesar:renderProcesar,revision:renderRevision,cola:renderCola,documentos:renderDocumentos,problemas:renderProblemas,conciliacion:renderConciliacion,dgii:renderDGII,ncfcontrol:renderNCFControl,cierre:renderCierre,multiempresa:renderMultiEmpresa,correo:renderCorreo,salida:renderSalida,resumen:renderResumenDiario,archivo:renderArchivo,config:renderConfig};
+  if(view==='review-detail') { m.innerHTML=renderReviewDetail(reviewDocId); window.scrollTo(0,0); return; }
+  m.innerHTML=(R[view]||renderPanel)();
+  if(view==='documentos') attachFilters();
+  if(view==='panel') animateBars();
+  window.scrollTo(0,0);
+}
+
+/* ===================== PANEL ===================== */
+function renderPanel(){
+  const total=DOCS.length;
+  const ok=DOCS.filter(d=>d.estado==='ok').length;
+  const probl=total-ok;
+  const itbis=DOCS.reduce((s,d)=>s+d.itbis,0);
+  const gasto=DOCS.reduce((s,d)=>s+d.total,0);
+  const isRO=currentUser.role==='gerencial';
+
+  const cats={};
+  DOCS.forEach(d=>{cats[d.categoria]=(cats[d.categoria]||0)+d.total;});
+  const catMax=Math.max(...Object.values(cats));
+  const bars=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`
+    <div class="bar-row">
+      <div class="bl">${c}</div>
+      <div class="bar-track"><div class="bar-fill" data-w="${Math.round(v/catMax*100)}" style="width:0%">${money(v).replace('RD$','')}</div></div>
+    </div>`).join('');
+
+  const donut=donutSVG(ok, DOCS.filter(d=>d.estado==='warn').length, DOCS.filter(d=>d.estado==='err').length);
+
+  return `
+  <div class="main-header">
+    <div><h2>${isRO?'Dashboard ejecutivo':'Panel'}</h2><div class="sub">Julio 2026 · al día 9 · Contable Rosales &amp; Asociados</div></div>
+    ${demoBadge()}
+  </div>
+  ${isRO?'<div class="note readonly">👁 Rol Gerencial — vista de solo lectura: KPIs, reportes y documentos. Sin acciones de edición.</div>':''}
+
+  <div class="kpi-grid">
+    <div class="kpi" style="--kc:var(--emerald)"><div class="lbl">Documentos procesados</div><div class="val">${total}</div><div class="delta"><b>${ok}</b> correctos · flujo automático</div></div>
+    <div class="kpi" style="--kc:var(--cyan)"><div class="lbl">ITBIS identificado</div><div class="val">${money(itbis)}</div><div class="delta">18% detectado por la IA</div></div>
+    <div class="kpi" style="--kc:var(--violet)"><div class="lbl">Gasto registrado</div><div class="val">${money(gasto)}</div><div class="delta">en ${Object.keys(cats).length} categorías</div></div>
+    <div class="kpi" style="--kc:var(--coral)"><div class="lbl">Errores pendientes</div><div class="val">${probl}</div><div class="delta"><b class="bad">requieren revisión</b> humana</div></div>
+  </div>
+
+  <div class="pipeline">
+    <div class="pl-stage"><div class="n">3</div><div class="t">En espera</div><div class="folder">/Por_Procesar</div></div>
+    <div class="pl-arrow">→</div>
+    <div class="pl-stage"><div class="n" style="color:var(--emerald)">✦</div><div class="t">Motor IA</div><div class="folder">extracción + validación</div></div>
+    <div class="pl-arrow">→</div>
+    <div class="pl-stage"><div class="n">${ok}</div><div class="t">Correctos</div><div class="folder">/Procesados</div></div>
+    <div class="pl-arrow">→</div>
+    <div class="pl-stage"><div class="n" style="color:var(--coral)">${probl}</div><div class="t">Con problemas</div><div class="folder">/Con_Errores</div></div>
+  </div>
+
+  <div class="grid-32">
+    <div class="card chart-card">
+      <h4>Gasto por categoría</h4>
+      ${bars}
+    </div>
+    <div class="card chart-card">
+      <h4>Estado de documentos</h4>
+      ${donut}
+      <div class="legend">
+        <div class="li"><span class="sw" style="background:var(--emerald)"></span>Correctos (${ok})</div>
+        <div class="li"><span class="sw" style="background:var(--amber)"></span>Incompletos (${DOCS.filter(d=>d.estado==='warn').length})</div>
+        <div class="li"><span class="sw" style="background:var(--coral)"></span>Con error (${DOCS.filter(d=>d.estado==='err').length})</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="block" style="margin-top:24px;">
+    <div class="block-head">
+      <h3>Últimos documentos con problemas <span class="count bad">${probl}</span></h3>
+      ${!isRO?`<button class="btn-ghost" onclick="navigate('${currentUser.role==='admin'?'problemas':'cola'}')">Ver todos →</button>`:''}
+    </div>
+    ${DOCS.filter(d=>d.estado!=='ok').slice(0,3).map(d=>`
+      <div class="queue-item">
+        <div class="qi-icon ${d.estado}">${d.estado==='err'?'✕':'!'}</div>
+        <div class="qi-body">
+          <div class="qi-title">${d.id} — ${d.proveedor}</div>
+          <div class="qi-meta">${d.tipo} · ${d.fecha} · asignado a ${d.area}</div>
+          <div class="obs">${d.obs}</div>
+        </div>
+        ${chip(d.estado,d)}
+      </div>`).join('')}
+  </section>`;
+}
+function donutSVG(ok,warn,err){
+  const total=ok+warn+err, C=2*Math.PI*54;
+  let off=0;
+  const seg=(v,color)=>{
+    const len=v/total*C;
+    const s=`<circle r="54" cx="70" cy="70" fill="none" stroke="${color}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;
+    off+=len; return s;
+  };
+  return `<div style="display:flex;justify-content:center;padding:6px 0;">
+  <svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Estados de documentos">
+    <circle r="54" cx="70" cy="70" fill="none" stroke="var(--bg2)" stroke-width="16"/>
+    ${seg(ok,'var(--emerald)')}${seg(warn,'var(--amber)')}${seg(err,'var(--coral)')}
+    <text x="70" y="66" text-anchor="middle" fill="var(--text)" font-size="24" font-weight="700" font-family="Space Grotesk">${total}</text>
+    <text x="70" y="84" text-anchor="middle" fill="var(--text-mute)" font-size="10">docs</text>
+  </svg></div>`;
+}
+function animateBars(){
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{document.querySelectorAll('.bar-fill').forEach(b=>{b.style.width=b.dataset.w+'%';});},60);
+  });
+}
+
+/* ===================== PROCESAR (simulador IA) ===================== */
+const FIELD_DEFS=[
+  ['tipo','Tipo de documento'],['proveedor','Proveedor / emisor'],
+  ['fecha','Fecha'],['categoria','Categoría sugerida'],
+  ['rnc','RNC'],['ncf','NCF'],
+  ['subtotal','Subtotal'],['itbis','ITBIS (18%)'],
+  ['total','Total'],['pago','Método de pago'],
+  ['centro','Centro de costo'],['area','Notificar a'],
+];
+function renderProcesar(){
+  const doc=INCOMING[incomingIdx % INCOMING.length];
+  return `
+  <div class="main-header">
+    <div><h2>Procesar con IA</h2><div class="sub">Simulación del motor de extracción — Módulos 1, 3 y 4</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ En producción esto ocurre solo: ContaFlow revisa <b>/Por_Procesar</b> cada 5–10 min y procesa lo nuevo. Aquí lo disparas manualmente para la demo.</div>
+
+  <div class="proc-grid">
+    <div class="card doc-preview">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-size:12px;color:var(--text-dim);font-weight:600;">📄 ${nextFileName(doc)}</span>
+        <span style="font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;">/Por_Procesar</span>
+      </div>
+      <div style="position:relative;">
+        <div class="doc-paper ${doc.fail==='blur'?'blurry':''}" id="doc-paper">${paperHTML(doc)}</div>
+        <div class="scanline" id="scanline"></div>
+      </div>
+    </div>
+
+    <div class="card extract-panel">
+      <div class="xt-head">
+        <h4>Campos extraídos por la IA</h4>
+        <div class="xt-status" id="xt-status"><span class="spin"></span><span id="xt-status-txt">En espera</span></div>
+      </div>
+      <div class="xt-fields" id="xt-fields">
+        ${FIELD_DEFS.map(([k,l])=>`<div class="xt-field" id="xf-${k}"><div class="fl">${l}</div><div class="fv" id="xv-${k}"></div></div>`).join('')}
+      </div>
+      <div class="valid-list">
+        <h5>Validaciones automáticas</h5>
+        <div class="v-item" id="v-ncf"><span class="vi">•</span>Formato de NCF válido</div>
+        <div class="v-item" id="v-rnc"><span class="vi">•</span>Formato de RNC correcto (9 dígitos)</div>
+        <div class="v-item" id="v-dup"><span class="vi">•</span>Sin duplicados (proveedor + monto + fecha)</div>
+        <div class="v-item" id="v-img"><span class="vi">•</span>Imagen legible</div>
+        <div class="v-item" id="v-campos"><span class="vi">•</span>Campos críticos completos</div>
+      </div>
+      <div class="proc-result" id="proc-result"></div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-solid" id="btn-proc" onclick="runExtraction()">✦ Procesar documento</button>
+        <button class="btn-ghost" id="btn-next" onclick="nextIncoming()" style="display:none;">Siguiente documento →</button>
+      </div>
+    </div>
+  </div>`;
+}
+function nextFileName(doc){
+  const ext = doc.fail==='blur' ? 'jpg' : 'pdf';
+  return doc.proveedor.replace('DEMO_','demo_').toLowerCase().replace(/[^a-z0-9]+/g,'_') + '.' + ext;
+}
+function paperHTML(d){
+  return `
+    <div class="dp-head">${d.proveedor.replace('DEMO_','')}<br><span style="font-weight:400;">RNC: ${d.rnc} · Santo Domingo, R.D.</span></div>
+    <div class="dp-row"><span>NCF:</span><span>${d.ncf}</span></div>
+    <div class="dp-row"><span>Fecha:</span><span>${d.fecha}</span></div>
+    <div class="dp-row"><span>Condición:</span><span>${d.pago}</span></div>
+    <div style="margin-top:8px;border-top:1px solid #C9C5B8;padding-top:8px;">
+      <div class="dp-row"><span>Artículos varios</span><span>${d.subtotal.toFixed(2)}</span></div>
+      <div class="dp-row"><span>Subtotal</span><span>${d.subtotal.toFixed(2)}</span></div>
+      <div class="dp-row"><span>ITBIS 18%</span><span>${d.itbis.toFixed(2)}</span></div>
+    </div>
+    <div class="dp-total"><div class="dp-row"><span>TOTAL RD$</span><span>${d.total.toFixed(2)}</span></div></div>
+    <div style="margin-top:10px;font-size:9px;color:#8A8578;">— DOCUMENTO FICTICIO PARA DEMO —</div>`;
+}
+function typeInto(el, text, speed=18){
+  return new Promise(res=>{
+    let i=0; el.innerHTML='<span class="caret"></span>';
+    const iv=setInterval(()=>{
+      i++;
+      el.innerHTML = text.slice(0,i) + (i<text.length?'<span class="caret"></span>':'');
+      if(i>=text.length){clearInterval(iv);res();}
+    },speed);
+  });
+}
+async function runExtraction(){
+  if(processing) return;
+  processing=true;
+  const doc=INCOMING[incomingIdx % INCOMING.length];
+  $('btn-proc').disabled=true;
+  $('scanline').classList.add('on');
+  const st=$('xt-status'); st.classList.add('working'); $('xt-status-txt').textContent='Leyendo documento…';
+
+  const vals={
+    tipo:doc.tipo, proveedor:doc.proveedor, fecha:doc.fecha, categoria:doc.categoria,
+    rnc:doc.rnc, ncf:doc.ncf, subtotal:money(doc.subtotal), itbis:money(doc.itbis),
+    total:money(doc.total), pago:doc.pago, centro:doc.centro, area:doc.area
+  };
+  await new Promise(r=>setTimeout(r,900));
+  $('xt-status-txt').textContent='Extrayendo campos…';
+  for(const [k] of FIELD_DEFS){
+    const f=$('xf-'+k), v=$('xv-'+k);
+    f.classList.add('filled','flash');
+    await typeInto(v, String(vals[k]));
+    f.classList.remove('flash');
+    await new Promise(r=>setTimeout(r,70));
+  }
+  $('scanline').classList.remove('on');
+  $('xt-status-txt').textContent='Validando…';
+
+  const checks=[
+    ['v-ncf', doc.fail!=='ncf'],
+    ['v-rnc', doc.fail!=='rnc'],
+    ['v-dup', true],
+    ['v-img', doc.fail!=='blur'],
+    ['v-campos', true],
+  ];
+  let failed=null;
+  for(const [id,pass] of checks){
+    await new Promise(r=>setTimeout(r,420));
+    const el=$(id);
+    el.classList.add('done', pass?'pass':'fail');
+    el.querySelector('.vi').textContent = pass?'✓':'✕';
+    if(!pass && !failed) failed=id;
+  }
+  st.classList.remove('working');
+
+  const res=$('proc-result');
+  let estado='ok', obs=null;
+  if(doc.fail==='ncf'){estado='err';obs='NCF incompleto — 7 caracteres, se esperan 11';}
+  if(doc.fail==='rnc'){estado='err';obs='RNC con 4 dígitos — se esperan 9';}
+  if(doc.fail==='blur'){estado='warn';obs='Imagen borrosa — verificar monto manualmente';}
+
+  if(estado==='ok'){
+    res.className='proc-result show ok';
+    res.innerHTML='✓ Documento correcto → movido a <b>/Procesados</b> y registrado en la hoja de salida.';
+    $('xt-status-txt').textContent='Completado';
+  }else if(estado==='warn'){
+    res.className='proc-result show warn';
+    res.innerHTML='! Documento incompleto → movido a <b>/Con_Errores</b>. '+obs+'.';
+    $('xt-status-txt').textContent='Con observación';
+  }else{
+    res.className='proc-result show err';
+    res.innerHTML='✕ Error detectado → movido a <b>/Con_Errores</b>. '+obs+'.';
+    $('xt-status-txt').textContent='Con errores';
+  }
+
+  const id='DOC-0'+(nextDocNum++);
+  DOCS.unshift({id, proveedor:doc.proveedor, tipo:doc.tipo, fecha:doc.fecha, ncf:doc.ncf, rnc:doc.rnc,
+    subtotal:doc.subtotal, itbis:doc.itbis, total:doc.total, pago:doc.pago, categoria:doc.categoria,
+    centro:doc.centro, area:doc.area, estado, obs});
+  toast('Notificación interna', `Se notificó a <b>${doc.area}</b>: nuevo documento ${id} ${estado==='ok'?'procesado correctamente':'requiere revisión'}.`);
+  $('btn-next').style.display='inline-flex';
+  processing=false;
+}
+function nextIncoming(){
+  incomingIdx++;
+  navigate('procesar');
+}
+
+/* ===================== COLA ===================== */
+function renderCola(){
+  const mine = currentUser.role==='admin' ? DOCS.filter(d=>d.estado!=='ok') : DOCS.filter(d=>d.area===currentUser.name && d.estado!=='ok');
+  return `
+  <div class="main-header">
+    <div><h2>${currentUser.role==='admin'?'Cola de trabajo general':'Mi cola de trabajo'}</h2>
+    <div class="sub">Área: ${currentUser.area}</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ Los documentos correctos fluyen solos a <b>/Procesados</b>. Aquí solo aparece lo que necesita criterio humano.</div>
+  <section class="block">
+    <div class="block-head"><h3>Pendientes <span class="count ${mine.length?'bad':''}">${mine.length}</span></h3></div>
+    ${mine.length?mine.map(d=>`
+      <div class="queue-item">
+        <div class="qi-icon ${d.estado}">${d.estado==='err'?'✕':'!'}</div>
+        <div class="qi-body">
+          <div class="qi-title">${d.id} — ${d.proveedor}</div>
+          <div class="qi-meta">${d.tipo} · ${d.fecha} · NCF <span class="ncf">${d.ncf}</span> · ${money(d.total)}${currentUser.role==='admin'?` · ${d.area}`:''}</div>
+          <div class="obs">${d.obs}</div>
+        </div>
+        <button class="btn-solid" onclick="openReview('${d.id}')">✎ Revisar y corregir</button>
+      </div>`).join(''):'<div class="empty">✓ Nada pendiente en tu área. Todo al día.</div>'}
+  </section>`;
+}
+function resolveDoc(id){
+  openReview(id);
+}
+
+/* ===================== DOCUMENTOS ===================== */
+function renderDocumentos(){
+  return `
+  <div class="main-header">
+    <div><h2>Documentos</h2><div class="sub">Todos los documentos del mes con filtros</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="filters">
+    <select id="f-estado"><option value="">Estado: todos</option><option value="ok">Correcto</option><option value="warn">Incompleto</option><option value="err">Error</option></select>
+    <select id="f-cat"><option value="">Categoría: todas</option>${[...new Set(DOCS.map(d=>d.categoria))].map(c=>`<option>${c}</option>`).join('')}</select>
+    <input type="text" id="f-prov" placeholder="Buscar proveedor…">
+    <div class="fspacer"></div>
+    <button class="btn-ghost" onclick="toast('Exportación','En la versión conectada esto descarga el Excel con los filtros aplicados.')">⬇ Excel</button>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Doc.</th><th>Proveedor</th><th>Tipo</th><th>Fecha</th><th>NCF</th><th>RNC</th><th>Categoría</th><th style="text-align:right;">Total</th><th>Estado</th></tr></thead>
+      <tbody id="docs-tbody">${docRows(DOCS)}</tbody>
+    </table>
+  </div>`;
+}
+function docRows(list){
+  if(!list.length) return '<tr><td colspan="9"><div class="empty">Ningún documento coincide con esos filtros.</div></td></tr>';
+  return list.map(d=>`
+    <tr style="cursor:pointer;" onclick="openReview('${d.id}')">
+      <td class="mono" style="font-size:12px;">${d.id}</td>
+      <td>${d.proveedor}</td><td>${d.tipo}</td><td>${d.fecha}</td>
+      <td class="ncf">${d.ncf}</td><td class="rnc">${d.rnc}</td>
+      <td>${d.categoria}</td><td class="amt">${money(d.total)}</td>
+      <td>${chip(d.estado,d)} ${corrTag(d)}</td>
+    </tr>`).join('');
+}
+function attachFilters(){
+  const fe=$('f-estado'),fc=$('f-cat'),fp=$('f-prov');
+  const apply=()=>{
+    let l=DOCS;
+    if(fe.value)l=l.filter(d=>d.estado===fe.value);
+    if(fc.value)l=l.filter(d=>d.categoria===fc.value);
+    if(fp.value.trim())l=l.filter(d=>d.proveedor.toLowerCase().includes(fp.value.trim().toLowerCase()));
+    $('docs-tbody').innerHTML=docRows(l);
+  };
+  fe.onchange=apply;fc.onchange=apply;fp.oninput=apply;
+}
+
+/* ===================== PROBLEMAS ===================== */
+function renderProblemas(){
+  const list=DOCS.filter(d=>d.estado!=='ok');
+  return `
+  <div class="main-header">
+    <div><h2>Documentos con problemas</h2><div class="sub">Observación específica por documento — carpeta /Con_Errores</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Doc.</th><th>Proveedor</th><th>Responsable</th><th>Estado</th><th>Observación</th></tr></thead>
+      <tbody>${list.map(d=>`
+        <tr><td class="mono" style="font-size:12px;">${d.id}</td><td>${d.proveedor}</td><td>${d.area}</td><td>${chip(d.estado,d)}</td><td class="obs">${d.obs}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+/* ===================== REVISIÓN HUMANA ===================== */
+let reviewDocId = null;
+function renderRevision(){
+  const mine = currentUser.role==='admin' ? DOCS.filter(d=>d.estado!=='ok') : DOCS.filter(d=>d.area===currentUser.name && d.estado!=='ok');
+  const corrected = DOCS.filter(d=>d.correctedBy);
+  return `
+  <div class="main-header">
+    <div><h2>Revisión humana</h2><div class="sub">Documentos que la IA marcó con problemas — comparar, corregir y archivar</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ Selecciona un documento para abrir la vista dividida: a la izquierda el documento original (escaneado/digital), a la derecha los campos editables para corregir. Al guardar, el documento se mueve a <b>/Procesados</b> con la etiqueta de quién lo corrigió.</div>
+
+  <section class="block">
+    <div class="block-head"><h3>Pendientes de revisión <span class="count bad">${mine.length}</span></h3></div>
+    ${mine.length ? mine.map(d=>`
+      <div class="queue-item" style="cursor:pointer;" onclick="openReview('${d.id}')">
+        <div class="qi-icon ${d.estado}">${d.estado==='err'?'✕':'!'}</div>
+        <div class="qi-body">
+          <div class="qi-title">${d.id} — ${d.proveedor}</div>
+          <div class="qi-meta">${d.tipo} · ${d.fecha} · NCF <span class="ncf">${d.ncf}</span> · ${money(d.total)}${currentUser.role==='admin'?' · '+d.area:''}</div>
+          <div class="obs">${d.obs}</div>
+        </div>
+        <button class="btn-solid" onclick="event.stopPropagation();openReview('${d.id}')">✎ Revisar y corregir</button>
+      </div>`).join('') : '<div class="empty">✓ No hay documentos pendientes de revisión. Todo al día.</div>'}
+  </section>
+
+  ${corrected.length ? `<section class="block">
+    <div class="block-head"><h3>Corregidos recientemente <span class="count">${corrected.length}</span></h3></div>
+    ${corrected.slice(0,5).map(d=>`
+      <div class="queue-item" style="cursor:pointer;" onclick="openReview('${d.id}')">
+        <div class="qi-icon" style="background:rgba(34,211,238,0.12);color:var(--cyan);">✎</div>
+        <div class="qi-body">
+          <div class="qi-title">${d.id} — ${d.proveedor} ${corrTag(d)}</div>
+          <div class="qi-meta">${d.tipo} · ${d.fecha} · ${money(d.total)}</div>
+        </div>
+        ${chip(d.estado,d)}
+      </div>`).join('')}
+  </section>` : ''}`;
+}
+
+function openReview(id){
+  reviewDocId = id;
+  buildNav();
+  document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.toggle('active',a.dataset.view==='revision'));
+  $('main-content').innerHTML = renderReviewDetail(id);
+  window.scrollTo(0,0);
+}
+
+function renderReviewDetail(id){
+  const d = DOCS.find(x=>x.id===id);
+  if(!d) return '<div class="empty">Documento no encontrado.</div>';
+  const isErr = d.estado==='err', isWarn = d.estado==='warn', isCorrected = !!d.correctedBy;
+  const isEditable = !isCorrected && currentUser.role!=='gerencial';
+  const blurry = (d.obs||'').toLowerCase().includes('borrosa') || (d.obs||'').toLowerCase().includes('blur');
+
+  const alertHTML = d.obs ? `<div class="rev-alert ${isErr?'err':'warn'}">⚠ <div><b>Observación de la IA:</b> ${d.obs}</div></div>` : '';
+  const correctedHTML = isCorrected ? `<div class="note" style="background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.2);color:#A5E8F5;margin-bottom:16px;">
+    ✎ <div>Documento corregido por <b>${d.correctedBy}</b> — ya archivado en <b>/Procesados</b>. Los campos muestran los valores finales.</div></div>` : '';
+
+  return `
+  <div class="main-header">
+    <div>
+      <h2>${d.id} — Revisión</h2>
+      <div class="sub">${d.proveedor} · ${d.tipo} · ${d.fecha}</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-ghost" onclick="navigate('revision')">← Volver a lista</button>
+      <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+    </div>
+  </div>
+
+  <div class="rev-split">
+    <!-- IZQUIERDA: Documento original -->
+    <div class="rev-doc">
+      <div class="rev-tab-bar">
+        <div class="rev-tab active">📄 Documento original</div>
+      </div>
+      <div class="rev-doc-paper ${blurry?'blurry':''}" id="rev-paper">
+        <div class="dp-head">${d.proveedor.replace('DEMO_','')}<br><span style="font-weight:400;">RNC: ${d.rnc} · Santo Domingo, R.D.</span></div>
+        <div class="dp-row"><span>NCF:</span><span>${d.ncf}</span></div>
+        <div class="dp-row"><span>Fecha:</span><span>${d.fecha}</span></div>
+        <div class="dp-row"><span>Condición:</span><span>${d.pago}</span></div>
+        <div style="margin-top:8px;border-top:1px solid #C9C5B8;padding-top:8px;">
+          <div class="dp-row"><span>Artículos varios</span><span>${d.subtotal.toFixed(2)}</span></div>
+          <div class="dp-row"><span>Subtotal</span><span>${d.subtotal.toFixed(2)}</span></div>
+          <div class="dp-row"><span>ITBIS 18%</span><span>${d.itbis.toFixed(2)}</span></div>
+        </div>
+        <div class="dp-total"><div class="dp-row"><span>TOTAL RD$</span><span>${d.total.toFixed(2)}</span></div></div>
+        <div style="margin-top:10px;font-size:9px;color:#8A8578;">— DOCUMENTO FICTICIO PARA DEMO —</div>
+      </div>
+      <div class="rev-doc-meta">
+        <span>📁 /Con_Errores/${d.id.toLowerCase()}.pdf</span>
+        <span>📅 Recibido: ${d.fecha}</span>
+        <span>👤 Área: ${d.area}</span>
+      </div>
+    </div>
+
+    <!-- DERECHA: Formulario de corrección -->
+    <div class="rev-form">
+      <div class="rev-form-head">
+        <h3>${isEditable ? '✎ Corregir campos' : (isCorrected ? '✓ Campos corregidos' : '👁 Vista de lectura')}</h3>
+        ${isCorrected ? corrTag(d) : ''}
+      </div>
+      ${alertHTML}
+      ${correctedHTML}
+      <div class="rev-fields">
+        ${revFieldHTML('tipo','Tipo de documento', d.tipo, isEditable)}
+        ${revFieldHTML('proveedor','Proveedor / emisor', d.proveedor, isEditable)}
+        ${revFieldHTML('fecha','Fecha', d.fecha, isEditable)}
+        ${revFieldHTML('categoria','Categoría sugerida', d.categoria, isEditable)}
+        ${revFieldHTML('rnc','RNC', d.rnc, isEditable, (d.obs||'').toLowerCase().includes('rnc'))}
+        ${revFieldHTML('ncf','NCF', d.ncf, isEditable, (d.obs||'').toLowerCase().includes('ncf'))}
+        ${revFieldHTML('subtotal','Subtotal', d.subtotal.toFixed(2), isEditable)}
+        ${revFieldHTML('itbis','ITBIS (18%)', d.itbis.toFixed(2), isEditable)}
+        ${revFieldHTML('total','Total', d.total.toFixed(2), isEditable, (d.obs||'').toLowerCase().includes('monto'))}
+        ${revFieldHTML('pago','Método de pago', d.pago, isEditable)}
+        ${revFieldHTML('centro','Centro de costo', d.centro, isEditable)}
+        ${revFieldHTML('area','Notificar a', d.area, isEditable)}
+        <div class="rev-field full">
+          <label>Observación libre / nota de corrección</label>
+          <input id="rv-nota" value="${d.obs||''}" ${isEditable?'':'readonly'} placeholder="Escriba una nota si corrige algo…" style="font-family:'Inter',sans-serif;">
+        </div>
+      </div>
+      ${isEditable ? `
+      <div class="rev-actions">
+        <button class="btn-solid" onclick="saveReview('${d.id}')">✓ Guardar corrección y archivar</button>
+        <button class="btn-ghost" onclick="navigate('revision')">Cancelar</button>
+        <div class="fspacer"></div>
+        <span style="font-size:11px;color:var(--text-mute);">Se marcará como: ✎ ${currentUser.initials} · ${currentUser.name}</span>
+      </div>` : `
+      <div class="rev-actions">
+        <button class="btn-ghost" onclick="navigate('revision')">← Volver</button>
+      </div>`}
+    </div>
+  </div>`;
+}
+
+function revFieldHTML(key, label, value, editable, hasErr){
+  return `<div class="rev-field ${hasErr?'has-err':''}">
+    <label>${label} ${hasErr?'⚠':''}</label>
+    <input id="rv-${key}" value="${value}" ${editable?'':'readonly'} ${!editable?'style="opacity:.7;cursor:default;"':''}>
+  </div>`;
+}
+
+function saveReview(id){
+  const d = DOCS.find(x=>x.id===id);
+  if(!d) return;
+  // Leer todos los campos del formulario
+  const fields = ['tipo','proveedor','fecha','categoria','rnc','ncf','subtotal','itbis','total','pago','centro','area'];
+  fields.forEach(k=>{
+    const el = $('rv-'+k);
+    if(!el) return;
+    const v = el.value.trim();
+    if(['subtotal','itbis','total'].includes(k)){
+      const n = parseFloat(v.replace(/[^0-9.,]/g,'').replace(',','.'));
+      if(!isNaN(n)) d[k] = n;
+    } else { d[k] = v; }
+  });
+  const nota = $('rv-nota');
+  d.obs = nota && nota.value.trim() ? nota.value.trim() : null;
+  d.estado = 'ok';
+  d.correctedBy = currentUser.initials + ' · ' + currentUser.name;
+  toast('Documento corregido',`${id} corregido por <b>${currentUser.name}</b> → archivado en <b>/Procesados</b>. Etiqueta: ✎ ${currentUser.initials}`);
+  navigate('revision');
+}
+
+/* ===================== CONCILIACIÓN BANCARIA ===================== */
+function renderConciliacion(){
+  if(concState==='result') return renderConcResult();
+  return renderConcUpload();
+}
+
+function renderConcUpload(){
+  return `
+  <div class="main-header">
+    <div><h2>Conciliación bancaria</h2><div class="sub">Cargue el estado de cuenta del banco y el reporte del sistema contable</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ Suba ambos documentos del mismo período. ContaFlow cruza las transacciones automáticamente, identifica las diferencias y genera un informe de conciliación profesional.</div>
+
+  <div class="conc-upload-grid card" id="conc-upload-area">
+    <!-- Estado de cuenta banco -->
+    <div class="conc-upload-card">
+      <h4>🏦 Estado de cuenta bancario</h4>
+      <div class="sub">PDF, imagen o digital del banco</div>
+      <div class="conc-dropzone ${concState==='upload'?'':'loaded'}" id="dz-bank" onclick="loadBankDemo()">
+        <div id="dz-bank-content">
+          <div class="dz-icon">🏦</div>
+          <div class="dz-text">Clic para cargar estado de cuenta<br><span style="font-size:11px;color:var(--text-mute);">PDF, JPG, PNG · o arrastrar aquí</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="conc-divider"><span>VS</span></div>
+
+    <!-- Reporte sistema contable -->
+    <div class="conc-upload-card">
+      <h4>📒 Reporte del sistema contable</h4>
+      <div class="sub">Movimientos del libro mayor / auxiliar</div>
+      <div class="conc-dropzone" id="dz-book" onclick="loadBookDemo()">
+        <div id="dz-book-content">
+          <div class="dz-icon">📒</div>
+          <div class="dz-text">Clic para cargar reporte contable<br><span style="font-size:11px;color:var(--text-mute);">PDF, JPG, PNG, Excel · o arrastrar aquí</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conc-start">
+    <div class="conc-period">
+      <span>Período:</span>
+      <select><option>Julio 2026</option></select>
+      <span>Cuenta:</span>
+      <select><option>Cta. Cte. 801-234567-8 · Banco Popular</option></select>
+    </div>
+    <button class="btn-solid" id="btn-conc" onclick="startConciliacion()" disabled>⇌ Procesar conciliación</button>
+  </div>`;
+}
+
+let bankLoaded=false, bookLoaded=false;
+function loadBankDemo(){
+  const dz=$('dz-bank'), ct=$('dz-bank-content');
+  dz.classList.add('loaded');
+  ct.innerHTML=`<div class="dz-file">✓ estado_cuenta_BPD_julio2026.pdf</div>
+    <div class="dz-text" style="margin-top:6px;">Banco Popular Dominicano<br>Cta. Cte. 801-234567-8<br>Período: 01-08 julio 2026<br><b>${BANK_TXS.length} movimientos · Saldo: ${money(BANK_TXS.reduce((s,t)=>s+t.monto,485320.00))}</b></div>`;
+  bankLoaded=true;
+  checkConcReady();
+}
+function loadBookDemo(){
+  const dz=$('dz-book'), ct=$('dz-book-content');
+  dz.classList.add('loaded');
+  ct.innerHTML=`<div class="dz-file">✓ mayor_auxiliar_bancos_julio2026.xlsx</div>
+    <div class="dz-text" style="margin-top:6px;">Contable Rosales &amp; Asoc.<br>Cuenta: Banco Popular CTE<br>Período: 01-08 julio 2026<br><b>${BOOK_TXS.length} movimientos · Saldo: ${money(BOOK_TXS.reduce((s,t)=>s+t.monto,485320.00))}</b></div>`;
+  bookLoaded=true;
+  checkConcReady();
+}
+function checkConcReady(){
+  const btn=$('btn-conc');
+  if(btn) btn.disabled = !(bankLoaded && bookLoaded);
+}
+
+async function startConciliacion(){
+  const main=$('main-content');
+  main.innerHTML=`
+  <div class="main-header">
+    <div><h2>Conciliación bancaria</h2><div class="sub">Procesando — julio 2026 · Banco Popular Dominicano</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="conc-processing card">
+    <div class="conc-spinner"></div>
+    <div class="conc-proc-status" id="conc-status">Iniciando análisis…</div>
+    <div class="conc-proc-steps">
+      <div class="conc-proc-step" id="cs-1"><span class="ps-dot">1</span>Leyendo estado de cuenta bancario</div>
+      <div class="conc-proc-step" id="cs-2"><span class="ps-dot">2</span>Leyendo reporte del sistema contable</div>
+      <div class="conc-proc-step" id="cs-3"><span class="ps-dot">3</span>Extrayendo transacciones con IA</div>
+      <div class="conc-proc-step" id="cs-4"><span class="ps-dot">4</span>Cruzando movimientos por monto, fecha y concepto</div>
+      <div class="conc-proc-step" id="cs-5"><span class="ps-dot">5</span>Identificando partidas en tránsito</div>
+      <div class="conc-proc-step" id="cs-6"><span class="ps-dot">6</span>Calculando saldos ajustados</div>
+      <div class="conc-proc-step" id="cs-7"><span class="ps-dot">7</span>Generando informe de conciliación</div>
+    </div>
+  </div>`;
+
+  const steps=['cs-1','cs-2','cs-3','cs-4','cs-5','cs-6','cs-7'];
+  const msgs=['Leyendo estado de cuenta…','Leyendo reporte contable…','Extrayendo transacciones…','Cruzando movimientos…','Identificando partidas en tránsito…','Calculando saldos ajustados…','Generando informe…'];
+  for(let i=0;i<steps.length;i++){
+    $(steps[i]).classList.add('active');
+    $('conc-status').textContent=msgs[i];
+    await new Promise(r=>setTimeout(r,700+Math.random()*400));
+    $(steps[i]).classList.remove('active');
+    $(steps[i]).classList.add('done');
+    $(steps[i]).querySelector('.ps-dot').textContent='✓';
+  }
+  $('conc-status').textContent='¡Conciliación completada!';
+  await new Promise(r=>setTimeout(r,600));
+  concState='result';
+  toast('Conciliación lista','Se generó el informe de conciliación de julio 2026. Se identificaron <b>4 partidas de conciliación</b>.');
+  navigate('conciliacion');
+}
+
+function renderConcResult(){
+  const saldoBanco = BANK_TXS.reduce((s,t)=>s+t.monto,485320.00);
+  const saldoLibros = BOOK_TXS.reduce((s,t)=>s+t.monto,485320.00);
+  const diff = saldoBanco - saldoLibros;
+
+  const chequesNoC = BOOK_TXS.filter((_,i)=>!CONC_MATCHES.find(m=>m[1]===i));
+  const bankNoReg = BANK_TXS.filter((_,i)=>!CONC_MATCHES.find(m=>m[0]===i));
+  const totalChequesNoC = chequesNoC.reduce((s,t)=>s+t.monto,0);
+  const totalBankNoReg = bankNoReg.reduce((s,t)=>s+t.monto,0);
+  const saldoAjBanco = saldoBanco + totalChequesNoC;
+  const saldoAjLibros = saldoLibros + totalBankNoReg;
+
+  // Construir filas lado a lado
+  const allRows = [];
+  const usedBank = new Set(), usedBook = new Set();
+  CONC_MATCHES.forEach(([bi,li,t])=>{
+    allRows.push({bank:BANK_TXS[bi], book:BOOK_TXS[li], tipo:t});
+    usedBank.add(bi); usedBook.add(li);
+  });
+  BANK_TXS.forEach((tx,i)=>{ if(!usedBank.has(i)) allRows.push({bank:tx, book:null, tipo:'bank-only'}); });
+  BOOK_TXS.forEach((tx,i)=>{ if(!usedBook.has(i)) allRows.push({bank:null, book:tx, tipo:'book-only'}); });
+
+  return `
+  <div class="main-header">
+    <div><h2>Conciliación bancaria — Resultado</h2><div class="sub">Julio 2026 · Banco Popular Dominicano · Cta. Cte. 801-234567-8</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción esto genera un PDF profesional del informe.')">⬇ PDF</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción esto genera un Excel con el detalle.')">⬇ Excel</button>
+        <button class="btn-ghost" onclick="concState='upload';bankLoaded=false;bookLoaded=false;navigate('conciliacion')">↻ Nueva conciliación</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="conc-summary-grid">
+    <div class="conc-stat"><div class="cs-lbl">Transacciones cruzadas</div><div class="cs-val" style="color:var(--emerald)">${CONC_MATCHES.length}</div><div class="cs-lbl">de ${BANK_TXS.length + BOOK_TXS.length} totales</div></div>
+    <div class="conc-stat"><div class="cs-lbl">Partidas de conciliación</div><div class="cs-val" style="color:var(--amber)">${bankNoReg.length + chequesNoC.length}</div><div class="cs-lbl">requieren revisión</div></div>
+    <div class="conc-stat"><div class="cs-lbl">Cheques en tránsito</div><div class="cs-val" style="color:var(--coral)">${chequesNoC.length}</div><div class="cs-lbl">${money(Math.abs(totalChequesNoC))}</div></div>
+    <div class="conc-stat"><div class="cs-lbl">Cargos no registrados</div><div class="cs-val" style="color:var(--violet);">${bankNoReg.length}</div><div class="cs-lbl">${money(Math.abs(totalBankNoReg))}</div></div>
+  </div>
+
+  <div class="conc-result-header">
+    <div class="conc-rh-side">
+      <div class="rh-label">Saldo según banco</div>
+      <div class="rh-val">${money(saldoBanco)}</div>
+    </div>
+    <div class="conc-rh-mid">
+      <div style="font-size:10px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-mute);font-weight:600;">Diferencia</div>
+      <div class="conc-rh-diff ${Math.abs(diff)<0.01?'zero':'nonzero'}">${diff>=0?'+':''}${money(diff)}</div>
+      <div style="font-size:10px;color:var(--text-mute);margin-top:2px;">antes de ajustes</div>
+    </div>
+    <div class="conc-rh-side">
+      <div class="rh-label">Saldo según libros</div>
+      <div class="rh-val">${money(saldoLibros)}</div>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="block-head"><h3>Cruce de transacciones</h3></div>
+    <div class="conc-match-grid">
+      <div class="conc-col">
+        <div class="conc-col-head"><span class="ch-icon">🏦</span>Estado de cuenta — Banco Popular</div>
+        ${allRows.map(r=>{
+          if(!r.bank) return `<div class="conc-tx empty-slot">— sin contrapartida en banco —</div>`;
+          const cls = r.tipo==='exact'?'matched':r.tipo==='bank-only'?'unmatched':'partial';
+          return `<div class="conc-tx ${cls}"><span class="tx-date">${r.bank.fecha}</span><span class="tx-desc">${r.bank.desc}</span><span class="tx-amt">${r.bank.monto>=0?'+':''}${money(r.bank.monto)}</span></div>`;
+        }).join('')}
+      </div>
+      <div class="conc-links">
+        ${allRows.map(r=>{
+          if(r.tipo==='exact') return '<div class="conc-link matched">══</div>';
+          if(r.tipo==='bank-only') return '<div class="conc-link unmatched">✕</div>';
+          if(r.tipo==='book-only') return '<div class="conc-link unmatched">✕</div>';
+          return '<div class="conc-link partial">≈</div>';
+        }).join('')}
+      </div>
+      <div class="conc-col">
+        <div class="conc-col-head"><span class="ch-icon">📒</span>Reporte contable — Libros</div>
+        ${allRows.map(r=>{
+          if(!r.book) return `<div class="conc-tx empty-slot">— sin registro en libros —</div>`;
+          const cls = r.tipo==='exact'?'matched':r.tipo==='book-only'?'unmatched':'partial';
+          return `<div class="conc-tx ${cls}"><span class="tx-date">${r.book.fecha}</span><span class="tx-desc">${r.book.desc}</span><span class="tx-amt">${r.book.monto>=0?'+':''}${money(r.book.monto)}</span></div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="legend" style="margin-bottom:20px;">
+      <div class="li"><span class="sw" style="background:var(--emerald);"></span>Conciliado (${CONC_MATCHES.length})</div>
+      <div class="li"><span class="sw" style="background:var(--coral);"></span>Solo en banco (${bankNoReg.length}) — cargos/abonos no registrados</div>
+      <div class="li"><span class="sw" style="background:var(--coral);"></span>Solo en libros (${chequesNoC.length}) — cheques/pagos en tránsito</div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head"><h3>Informe de conciliación</h3>
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir informe</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción se genera PDF profesional con membrete.')">⬇ PDF</button>
+      </div>
+    </div>
+    <div class="conc-report">
+      <div class="conc-report-head">
+        <h3>Informe de Conciliación Bancaria</h3>
+        <div class="sub">Contable Rosales &amp; Asociados · Banco Popular Dominicano · Cta. Cte. 801-234567-8 · Julio 2026</div>
+      </div>
+      <div class="conc-report-body">
+        <div class="conc-report-section">
+          <h5>Saldos iniciales</h5>
+          <div class="conc-report-row"><span>Saldo según estado de cuenta bancario</span><span class="rr-val">${money(saldoBanco)}</span></div>
+          <div class="conc-report-row"><span>Saldo según libros contables</span><span class="rr-val">${money(saldoLibros)}</span></div>
+          <div class="conc-report-row"><span>Diferencia antes de ajustes</span><span class="rr-val" style="color:${Math.abs(diff)<0.01?'var(--emerald)':'var(--coral)'};">${money(diff)}</span></div>
+        </div>
+
+        <div class="conc-report-section">
+          <h5>Partidas en tránsito — en libros, no en banco</h5>
+          ${chequesNoC.map(t=>`<div class="conc-report-row"><span>${t.desc}</span><span class="rr-val" style="color:var(--coral);">${money(t.monto)}</span></div>`).join('')}
+          <div class="conc-report-total"><span>Subtotal cheques/pagos en tránsito</span><span class="rr-val">${money(totalChequesNoC)}</span></div>
+        </div>
+
+        <div class="conc-report-section">
+          <h5>Cargos/abonos bancarios — en banco, no en libros</h5>
+          ${bankNoReg.map(t=>`<div class="conc-report-row"><span>${t.desc}</span><span class="rr-val" style="color:var(--amber);">${money(t.monto)}</span></div>`).join('')}
+          <div class="conc-report-total"><span>Subtotal cargos no registrados</span><span class="rr-val">${money(totalBankNoReg)}</span></div>
+        </div>
+
+        <div class="conc-report-section">
+          <h5>Saldos ajustados</h5>
+          <div class="conc-report-row"><span>Saldo banco + cheques en tránsito</span><span class="rr-val">${money(saldoAjBanco)}</span></div>
+          <div class="conc-report-row"><span>Saldo libros + cargos no registrados</span><span class="rr-val">${money(saldoAjLibros)}</span></div>
+          <div class="conc-report-total">
+            <span>Diferencia final</span>
+            <span class="rr-val" style="color:${Math.abs(saldoAjBanco-saldoAjLibros)<0.01?'var(--emerald)':'var(--coral)'};">${money(saldoAjBanco-saldoAjLibros)}</span>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;padding-top:16px;border-top:1px dashed var(--border);font-size:12px;color:var(--text-mute);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Preparado por ContaFlow (IA)</span><span>Julio 2026</span></div>
+          <div style="display:flex;justify-content:space-between;"><span>Revisado por: ________________</span><span>Fecha: ________________</span></div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ===================== ARCHIVO DRIVE ===================== */
+function renderArchivo(){
+  const proc = DOCS.filter(d=>d.estado==='ok');
+  const errs = DOCS.filter(d=>d.estado!=='ok');
+  const corrected = DOCS.filter(d=>d.correctedBy);
+  return `
+  <div class="main-header">
+    <div><h2>Repositorio Google Drive</h2><div class="sub">Estructura de carpetas por empresa — todos los documentos quedan archivados y organizados</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ En producción, cada empresa tiene su propio Google Drive con esta estructura. Cada documento procesado queda guardado en la carpeta correspondiente, con nombre estandarizado: <b>FECHA_PROVEEDOR_NCF.pdf</b></div>
+
+  <div class="drive-tree" id="drive-tree">
+    <div class="drive-folder" onclick="toggleDrive('df-procesar')">
+      <span class="df-icon">📁</span>
+      <span class="df-name">/Por_Procesar</span>
+      <span class="df-count">${errs.length > 0 ? errs.length+' pendientes' : 'vacía'}</span>
+    </div>
+
+    <div class="drive-folder" onclick="toggleDrive('df-procesados')">
+      <span class="df-icon" style="color:var(--emerald);">📂</span>
+      <span class="df-name">/Procesados</span>
+      <span class="df-count">${proc.length} documentos</span>
+    </div>
+    <div class="drive-files" id="df-procesados" style="display:none;">
+      ${proc.map(d=>`<div class="drive-file">
+        <span class="ff-icon" style="color:var(--emerald);">📄</span>
+        <span class="ff-name">${d.fecha}_${d.proveedor.replace('DEMO_','').replace(/[^a-zA-Z0-9]/g,'_')}_${d.ncf}.pdf</span>
+        ${d.correctedBy ? '<span class="corrected-tag">✎ '+d.correctedBy.split(' · ')[0]+'</span>' : ''}
+        <span class="ff-date">${d.fecha}</span>
+      </div>`).join('')}
+    </div>
+
+    <div class="drive-folder" onclick="toggleDrive('df-errores')">
+      <span class="df-icon" style="color:var(--coral);">📂</span>
+      <span class="df-name">/Con_Errores</span>
+      <span class="df-count">${errs.length} documentos</span>
+    </div>
+    <div class="drive-files" id="df-errores" style="display:none;">
+      ${errs.map(d=>`<div class="drive-file">
+        <span class="ff-icon">📄</span>
+        <span class="ff-name">${d.fecha}_${d.proveedor.replace('DEMO_','').replace(/[^a-zA-Z0-9]/g,'_')}_${d.ncf}.pdf</span>
+        <span class="ff-date">${d.fecha}</span>
+      </div>`).join('')}
+    </div>
+
+    <div class="drive-folder" onclick="toggleDrive('df-reportes')">
+      <span class="df-icon" style="color:var(--amber);">📂</span>
+      <span class="df-name">/Reportes</span>
+      <span class="df-count">8 resúmenes</span>
+    </div>
+    <div class="drive-files" id="df-reportes" style="display:none;">
+      ${['2026-07-08','2026-07-07','2026-07-06','2026-07-05','2026-07-04','2026-07-03','2026-07-02','2026-07-01'].map(f=>`
+        <div class="drive-file">
+          <span class="ff-icon" style="color:var(--amber);">📊</span>
+          <span class="ff-name">resumen_diario_${f}.pdf</span>
+          <span class="ff-date">${f}</span>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div style="margin-top:20px;display:flex;gap:16px;">
+    <div class="card cfg-card" style="flex:1;">
+      <h4>Estadísticas del repositorio</h4>
+      <div class="cfg-row"><span class="k">Total de documentos archivados</span><span class="v">${DOCS.length}</span></div>
+      <div class="cfg-row"><span class="k">Correctos en /Procesados</span><span class="v" style="color:var(--emerald);">${proc.length}</span></div>
+      <div class="cfg-row"><span class="k">Pendientes en /Con_Errores</span><span class="v" style="color:var(--coral);">${errs.length}</span></div>
+      <div class="cfg-row"><span class="k">Corregidos por humano</span><span class="v" style="color:var(--cyan);">${corrected.length}</span></div>
+      <div class="cfg-row"><span class="k">Resúmenes diarios</span><span class="v">8</span></div>
+    </div>
+    <div class="card cfg-card" style="flex:1;">
+      <h4>Convención de nombres</h4>
+      <div class="cfg-row"><span class="k">Facturas / recibos</span><span class="v">FECHA_PROVEEDOR_NCF.pdf</span></div>
+      <div class="cfg-row"><span class="k">Comprobantes</span><span class="v">FECHA_TIPO_RNC.pdf</span></div>
+      <div class="cfg-row"><span class="k">Resúmenes</span><span class="v">resumen_diario_FECHA.pdf</span></div>
+      <div class="cfg-row"><span class="k">Organización</span><span class="v">automática por carpeta</span></div>
+    </div>
+  </div>`;
+}
+
+function toggleDrive(id){
+  const el = $(id);
+  if(!el) return;
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+/* ===================== FORMATOS DGII 606/607/608 ===================== */
+let dgiiTab = '606';
+function renderDGII(){
+  const okDocs = DOCS.filter(d=>d.estado==='ok');
+  const errDocs = DOCS.filter(d=>d.estado!=='ok');
+  const pagoCode = p => ({Efectivo:'01',Cheque:'02',Transferencia:'03','Tarjeta':'04','Crédito':'05'}[p]||'01');
+  const ncfCode = n => { const m=n.match(/^([BE]\d{2})/); return m ? m[1].replace('B','').replace('E','') : '—'; };
+  const tipoId = r => r.length===9 ? '1' : r.length===11 ? '2' : '1';
+
+  const f606 = okDocs.filter(d=>d.ncf!=='—');
+  const totalF606 = f606.reduce((s,d)=>s+d.total,0);
+  const itbisF606 = f606.reduce((s,d)=>s+d.itbis,0);
+
+  return `
+  <div class="main-header">
+    <div><h2>Formatos DGII</h2><div class="sub">Generación automática de 606, 607 y 608 — listo para subir a la Oficina Virtual</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción se genera el archivo TXT en formato DGII listo para subir.')">⬇ TXT (DGII)</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción se genera Excel con el detalle.')">⬇ Excel</button>
+      </div>
+    </div>
+  </div>
+
+  ${errDocs.length ? `<div class="dgii-ready partial">⚠ Hay <b>${errDocs.length} documentos con errores</b> que no se incluirán en el formato hasta que sean corregidos. <button class="btn-ghost" onclick="navigate('revision')" style="margin-left:auto;padding:5px 12px;">Ir a revisión →</button></div>` : `<div class="dgii-ready ok">✓ Todos los documentos del mes están correctos y listos para incluir en los formatos.</div>`}
+
+  <div class="dgii-tabs">
+    <div class="dgii-tab active" onclick="dgiiTab='606';navigate('dgii')">606 — Compras<span class="dt-count">${f606.length}</span></div>
+    <div class="dgii-tab" onclick="toast('607','En esta demo solo se muestran compras (606). El 607 de ventas usa la misma lógica con los datos de facturación.')">607 — Ventas</div>
+    <div class="dgii-tab" onclick="toast('608','El 608 de comprobantes anulados se genera con los NCF que la empresa reporte como anulados.')">608 — Anulaciones</div>
+  </div>
+
+  <div style="margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div class="dgii-filename">📄 DGII_606_130245871_202607.txt</div>
+    <span style="font-size:12px;color:var(--text-dim);">${f606.length} registros · Monto total: ${money(totalF606)} · ITBIS: ${money(itbisF606)}</span>
+  </div>
+
+  <div class="dgii-preview">
+    <table>
+      <thead><tr>
+        <th>RNC / CÉD.</th><th>TIPO ID</th><th>TIPO NCF</th><th>NCF</th><th>FECHA</th>
+        <th>MONTO</th><th>ITBIS</th><th>RET. ITBIS</th><th>RET. ISR</th><th>FORMA PAGO</th>
+      </tr></thead>
+      <tbody>
+        ${f606.map(d=>`<tr>
+          <td>${d.rnc}</td>
+          <td>${tipoId(d.rnc)}</td>
+          <td>${ncfCode(d.ncf)}</td>
+          <td style="color:var(--cyan);">${d.ncf}</td>
+          <td>${d.fecha.replace(/-/g,'')}</td>
+          <td style="text-align:right;">${d.total.toFixed(2)}</td>
+          <td style="text-align:right;">${d.itbis.toFixed(2)}</td>
+          <td style="text-align:right;">0.00</td>
+          <td style="text-align:right;">0.00</td>
+          <td>${pagoCode(d.pago)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:16px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);font-size:12.5px;color:var(--text-dim);">
+    <b style="color:var(--text);">Códigos de referencia DGII:</b><br>
+    Tipo NCF: 01=Fiscal, 02=Consumo, 14=Gubernamental, 15=Especial, 31=e-CF · 
+    Forma de pago: 01=Efectivo, 02=Cheque, 03=Transferencia, 04=Tarjeta, 05=A crédito · 
+    Tipo ID: 1=RNC, 2=Cédula
+  </div>`;
+}
+
+/* ===================== CONTROL DE NCF ===================== */
+function renderNCFControl(){
+  return `
+  <div class="main-header">
+    <div><h2>Control de secuencias NCF</h2><div class="sub">Seguimiento de comprobantes fiscales autorizados por la DGII</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ ContaFlow monitorea el uso de cada secuencia autorizada. Cuando quedan menos del 20% de comprobantes o faltan menos de 90 días para el vencimiento, se genera una alerta automática.</div>
+
+  <div class="ncf-grid">
+    ${NCF_SEQS.map(s=>{
+      const total = parseInt(s.hasta.replace(/[^0-9]/g,'')) - parseInt(s.desde.replace(/[^0-9]/g,''));
+      const restantes = total - s.usados;
+      const pct = Math.round((s.usados/total)*100);
+      const diasVenc = Math.round((new Date(s.vence)-new Date('2026-07-09'))/(1000*60*60*24));
+      let alerta='ok', alertTxt='Disponibilidad saludable';
+      if(restantes/total < 0.2 || diasVenc < 90){ alerta='warn'; alertTxt=restantes/total<0.2?'Menos del 20% restante':'Vence en menos de 90 días'; }
+      if(restantes/total < 0.05 || diasVenc < 30){ alerta='crit'; alertTxt='¡Solicitar nueva secuencia!'; }
+      return `
+      <div class="ncf-card-seq" style="--ncc:${s.color}">
+        <div class="ncf-type">${s.tipo}</div>
+        <div class="ncf-desc">${s.nombre}</div>
+        <div class="ncf-bar-track">
+          <div class="ncf-bar-fill" style="width:${pct}%;background:${pct>80?'var(--coral)':pct>60?'var(--amber)':s.color};"></div>
+        </div>
+        <div class="ncf-stats">
+          <span>Usados: <b>${s.usados}</b> de ${total}</span>
+          <span>Quedan: <b>${restantes}</b></span>
+        </div>
+        <div class="ncf-stats" style="margin-top:6px;">
+          <span>Desde: <span class="mono" style="font-size:10.5px;">${s.desde}</span></span>
+          <span>Hasta: <span class="mono" style="font-size:10.5px;">${s.hasta}</span></span>
+        </div>
+        <div class="ncf-stats" style="margin-top:6px;">
+          <span>Vence: <b>${s.vence}</b></span>
+          <span>${diasVenc} días</span>
+        </div>
+        <div class="ncf-alert ${alerta}">${alerta==='ok'?'✓':alerta==='warn'?'⚠':'🚨'} ${alertTxt}</div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="card cfg-card" style="margin-top:20px;">
+    <h4>Resumen de comprobantes</h4>
+    ${NCF_SEQS.map(s=>{
+      const total = parseInt(s.hasta.replace(/[^0-9]/g,'')) - parseInt(s.desde.replace(/[^0-9]/g,''));
+      return `<div class="cfg-row"><span class="k">${s.tipo} — ${s.nombre}</span><span class="v">${s.usados} / ${total} usados · vence ${s.vence}</span></div>`;
+    }).join('')}
+  </div>`;
+}
+
+/* ===================== CHECKLIST CIERRE MENSUAL ===================== */
+function renderCierre(){
+  const total = DOCS.length;
+  const ok = DOCS.filter(d=>d.estado==='ok').length;
+  const errs = DOCS.filter(d=>d.estado!=='ok').length;
+  const sinCat = DOCS.filter(d=>!d.categoria || d.categoria==='').length;
+  const itbisTotal = DOCS.reduce((s,d)=>s+d.itbis,0);
+
+  const items = [
+    {sec:'Documentos',checks:[
+      {label:'Todos los documentos del mes procesados', done:true, reason:null},
+      {label:`Documentos con errores corregidos (${errs} pendientes)`, done:errs===0, reason:errs>0?`${errs} documentos en /Con_Errores requieren revisión humana`:null},
+      {label:'Todos los documentos tienen categoría asignada', done:sinCat===0, reason:sinCat>0?`${sinCat} documentos sin categoría`:null},
+      {label:'Sin duplicados pendientes por resolver', done:DOCS.filter(d=>(d.obs||'').includes('duplicado')||((d.obs||'').includes('Duplicado'))).filter(d=>d.estado!=='ok').length===0, reason:null},
+    ]},
+    {sec:'Impuestos (DGII)',checks:[
+      {label:`Formato 606 generado — ${ok} registros, ITBIS ${money(itbisTotal)}`, done:errs===0, reason:errs>0?'No se puede generar el 606 con documentos pendientes':null},
+      {label:'Formato 607 de ventas generado', done:true, reason:null},
+      {label:'Formato 608 de anulaciones revisado', done:true, reason:null},
+      {label:'Secuencias NCF verificadas (sin alertas críticas)', done:!NCF_SEQS.some(s=>{ const t=parseInt(s.hasta.replace(/[^0-9]/g,''))-parseInt(s.desde.replace(/[^0-9]/g,'')); return (t-s.usados)/t<0.05;}), reason:null},
+    ]},
+    {sec:'Conciliación',checks:[
+      {label:'Conciliación bancaria del mes completada', done:concState==='result', reason:concState!=='result'?'Falta ejecutar la conciliación bancaria':null},
+      {label:'Partidas de conciliación revisadas y registradas', done:concState==='result', reason:null},
+    ]},
+    {sec:'Reportes',checks:[
+      {label:'Resumen diario enviado al equipo', done:true, reason:null},
+      {label:'Hoja de salida actualizada en Google Sheets', done:true, reason:null},
+      {label:'Reporte gerencial del mes disponible', done:true, reason:null},
+    ]},
+  ];
+
+  const allChecks = items.flatMap(s=>s.checks);
+  const doneCount = allChecks.filter(c=>c.done).length;
+  const totalChecks = allChecks.length;
+  const pct = Math.round((doneCount/totalChecks)*100);
+  const C = 2*Math.PI*32;
+  const filled = (doneCount/totalChecks)*C;
+
+  return `
+  <div class="main-header">
+    <div><h2>Checklist de cierre mensual</h2><div class="sub">Julio 2026 — verificación automática antes del cierre</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción se genera un PDF del checklist con firmas.')">⬇ PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ck-progress">
+    <div class="ck-ring">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--bg2)" stroke-width="6"/>
+        <circle cx="40" cy="40" r="32" fill="none" stroke="${pct===100?'var(--emerald)':pct>60?'var(--amber)':'var(--coral)'}" stroke-width="6"
+          stroke-dasharray="${filled} ${C-filled}" stroke-linecap="round"/>
+      </svg>
+      <div class="ck-pct" style="color:${pct===100?'var(--emerald)':pct>60?'var(--amber)':'var(--coral)'}">${pct}%</div>
+    </div>
+    <div class="ck-info">
+      <h3>${pct===100?'¡Cierre listo!':pct>60?'Casi completo':'En progreso'}</h3>
+      <div class="sub">${doneCount} de ${totalChecks} tareas completadas · ${totalChecks-doneCount} pendientes</div>
+    </div>
+  </div>
+
+  ${items.map(s=>`
+    <div class="ck-section">
+      <div class="ck-section-head">${s.sec}</div>
+      ${s.checks.map(c=>`
+        <div class="ck-item ${c.done?'done':'blocked'}">
+          <div class="ck-check">${c.done?'✓':'✕'}</div>
+          <div>
+            <div class="ck-label">${c.label}</div>
+            ${c.reason?`<div class="ck-reason">→ ${c.reason}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('')}`;
+}
+
+/* ===================== DASHBOARD MULTI-EMPRESA ===================== */
+function renderMultiEmpresa(){
+  const totalDocs = EMPRESAS.reduce((s,e)=>s+e.docs,0);
+  const totalErr = EMPRESAS.reduce((s,e)=>s+e.errores,0);
+  const totalITBIS = EMPRESAS.reduce((s,e)=>s+e.itbis,0);
+  const cerradas = EMPRESAS.filter(e=>e.cierre===100).length;
+
+  return `
+  <div class="main-header">
+    <div><h2>Vista multi-empresa</h2><div class="sub">Estado del mes de todas las empresas gestionadas — julio 2026</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción se genera un reporte comparativo en PDF.')">⬇ PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="margin-bottom:22px;">
+    <div class="kpi" style="--kc:var(--emerald)"><div class="lbl">Empresas gestionadas</div><div class="val">${EMPRESAS.length}</div><div class="delta"><b>${cerradas}</b> con cierre completo</div></div>
+    <div class="kpi" style="--kc:var(--cyan)"><div class="lbl">Documentos totales</div><div class="val">${totalDocs}</div><div class="delta"><b class="bad">${totalErr}</b> con errores pendientes</div></div>
+    <div class="kpi" style="--kc:var(--violet)"><div class="lbl">ITBIS consolidado</div><div class="val">${money(totalITBIS)}</div><div class="delta">todas las empresas</div></div>
+    <div class="kpi" style="--kc:var(--amber)"><div class="lbl">Empresas atrasadas</div><div class="val">${EMPRESAS.filter(e=>e.status!=='ok').length}</div><div class="delta"><b class="bad">requieren atención</b></div></div>
+  </div>
+
+  <div class="me-grid">
+    ${EMPRESAS.map(e=>`
+    <div class="me-card" style="--mec:${e.color}">
+      <div class="me-card-head">
+        <div>
+          <h4>${e.nombre}</h4>
+          <span style="font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;">RNC: ${e.rnc}</span>
+        </div>
+        <span class="me-status ${e.status}">${e.statusLabel}</span>
+      </div>
+      <div class="me-metrics">
+        <div class="me-metric"><div class="mm-val">${e.docs}</div><div class="mm-lbl">Documentos</div></div>
+        <div class="me-metric"><div class="mm-val" style="color:${e.errores?'var(--coral)':'var(--emerald)'}">${e.errores}</div><div class="mm-lbl">Errores</div></div>
+        <div class="me-metric"><div class="mm-val" style="font-size:13px;">${money(e.itbis)}</div><div class="mm-lbl">ITBIS</div></div>
+        <div class="me-metric"><div class="mm-val" style="font-size:13px;">${money(e.gasto)}</div><div class="mm-lbl">Gasto total</div></div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-mute);margin-bottom:4px;">
+          <span>Cierre mensual</span><span style="font-weight:600;color:${e.cierre===100?'var(--emerald)':e.cierre>50?'var(--amber)':'var(--coral)'}">${e.cierre}%</span>
+        </div>
+        <div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:${e.cierre}%;background:${e.cierre===100?'var(--emerald)':e.cierre>50?'var(--amber)':'var(--coral)'};border-radius:3px;transition:width .8s;"></div>
+        </div>
+      </div>
+      <div class="me-checks">
+        <span class="me-ck ${e.conc==='done'?'done':'pend'}">${e.conc==='done'?'✓':'◷'} Conciliación</span>
+        <span class="me-ck ${e.f606==='ready'?'done':e.f606==='blocked'?'miss':'pend'}">${e.f606==='ready'?'✓':'✕'} 606</span>
+        <span class="me-ck ${e.errores===0?'done':'miss'}">${e.errores===0?'✓':'!'} Errores</span>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+/* ===================== CORREO ===================== */
+function renderCorreo(){
+  return `
+  <div class="main-header">
+    <div><h2>Correo monitoreado</h2><div class="sub">Módulo 2 — IMAP / Microsoft Graph según onboarding</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="note info">ℹ ContaFlow solo lee las direcciones configuradas por la empresa. Extrae los adjuntos, los deposita en <b>/Por_Procesar</b> y notifica al responsable interno — nunca al remitente.</div>
+  <div class="grid-32">
+    <div class="card">
+      ${MAILS.map(m=>`
+        <div class="mail-item">
+          <div class="mail-av">${m.from.replace('DEMO_','').slice(0,1)}</div>
+          <div class="mail-body">
+            <div class="mail-from">${m.from} <span style="color:var(--text-mute);font-weight:400;font-size:11.5px;">&lt;${m.mail}&gt;</span></div>
+            <div class="mail-subj">${m.subj}</div>
+            <div>${m.att.map(a=>`<span class="mail-att">📎 ${a}</span>`).join('')}</div>
+            <div class="mail-route">→ ${m.to}DEMOrosales.com · adjunto extraído a /Por_Procesar · notificado: <b>${m.resp}</b></div>
+          </div>
+          <div class="mail-time">${m.time}</div>
+        </div>`).join('')}
+    </div>
+    <div class="card cfg-card">
+      <h4>Direcciones monitoreadas</h4>
+      <div class="cfg-row"><span class="k">facturas@DEMOrosales.com</span><span class="v">→ Ana R.</span></div>
+      <div class="cfg-row"><span class="k">compras@DEMOrosales.com</span><span class="v">→ Pedro D.</span></div>
+      <div class="cfg-row"><span class="k">nomina@DEMOrosales.com</span><span class="v">→ María C.</span></div>
+      <div style="margin-top:14px;font-size:11.5px;color:var(--text-mute);">Conexión: IMAP · revisión cada 5 min<br>Todo lo demás se ignora.</div>
+    </div>
+  </div>`;
+}
+
+/* ===================== SALIDA (Sheets) ===================== */
+function renderSalida(){
+  return `
+  <div class="main-header">
+    <div><h2>Hoja de salida</h2><div class="sub">Módulo 5 — cada documento procesado genera una fila en Google Sheets</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción esto descarga la hoja completa como Excel.')">⬇ Excel</button>
+        <button class="btn-ghost" onclick="toast('Exportación','En producción esto genera un PDF de la hoja de salida.')">⬇ PDF</button>
+      </div>
+    </div>
+  </div>
+  <div class="sheet-bar"><span class="gdot">S</span><b>ContaFlow_Rosales_Julio2026</b><span style="color:#6B736E;">· Google Sheets · actualización automática</span></div>
+  <div class="sheet-wrap">
+    <table class="sheet">
+      <thead><tr><th class="rowh"></th><th>ID</th><th>FECHA</th><th>PROVEEDOR</th><th>TIPO</th><th>NCF</th><th>RNC</th><th>SUBTOTAL</th><th>ITBIS</th><th>TOTAL</th><th>PAGO</th><th>CATEGORÍA</th><th>C. COSTO</th><th>ESTADO</th><th>OBSERVACIÓN</th></tr></thead>
+      <tbody>
+        ${DOCS.map((d,i)=>`
+        <tr>
+          <td class="rowh">${i+2}</td>
+          <td>${d.id}</td><td>${d.fecha}</td><td>${d.proveedor}</td><td>${d.tipo}</td>
+          <td>${d.ncf}</td><td>${d.rnc}</td>
+          <td class="num">${d.subtotal.toFixed(2)}</td><td class="num">${d.itbis.toFixed(2)}</td><td class="num">${d.total.toFixed(2)}</td>
+          <td>${d.pago}</td><td>${d.categoria}</td><td>${d.centro}</td>
+          <td class="${d.estado==='ok'?'st-ok':d.estado==='warn'?'st-warn':'st-err'}">${d.estado==='ok'?'Correcto':d.estado==='warn'?'Incompleto':'Error'}</td>
+          <td>${d.obs||''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+/* ===================== RESUMEN DIARIO ===================== */
+function renderResumenDiario(){
+  const hoy=DOCS.filter(d=>d.fecha>='2026-07-08');
+  const ok=hoy.filter(d=>d.estado==='ok').length, warn=hoy.filter(d=>d.estado==='warn').length, err=hoy.filter(d=>d.estado==='err').length;
+  const itbis=hoy.reduce((s,d)=>s+d.itbis,0), gasto=hoy.reduce((s,d)=>s+d.total,0);
+  return `
+  <div class="main-header">
+    <div><h2>Resumen diario</h2><div class="sub">Módulo 6 — así se ve el email que llega cada tarde al equipo</div></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      ${demoBadge()}
+      <div class="report-toolbar">
+        <button class="btn-ghost" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn-ghost" onclick="toast('Descarga','En producción esto genera un PDF del resumen del día.')">⬇ Descargar PDF</button>
+      </div>
+    </div>
+  </div>
+  <div class="daily-mail">
+    <div class="dm-head">
+      <div class="s">De: ContaFlow &lt;resumen@DEMOrosales.com&gt; · Para: equipo contable</div>
+      <div class="j">📊 Resumen del día — miércoles 8 de julio, 2026</div>
+    </div>
+    <div class="dm-body">
+      <div class="dm-stat"><span>Documentos recibidos</span><span class="v">${hoy.length}</span></div>
+      <div class="dm-stat"><span>✓ Correctos</span><span class="v" style="color:var(--emerald)">${ok}</span></div>
+      <div class="dm-stat"><span>! Incompletos</span><span class="v" style="color:var(--amber)">${warn}</span></div>
+      <div class="dm-stat"><span>✕ Con error</span><span class="v" style="color:var(--coral)">${err}</span></div>
+      <div class="dm-stat"><span>ITBIS identificado hoy</span><span class="v">${money(itbis)}</span></div>
+      <div class="dm-stat"><span>Gasto registrado hoy</span><span class="v">${money(gasto)}</span></div>
+      <div class="dm-sec">Documentos que requieren atención</div>
+      ${DOCS.filter(d=>d.estado!=='ok').slice(0,4).map(d=>`
+        <div style="font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--border);">
+          <b>${d.id}</b> · ${d.proveedor}<br><span class="obs">${d.obs}</span> <span style="color:var(--text-mute)">→ ${d.area}</span>
+        </div>`).join('')}
+      <div style="margin-top:16px;font-size:11px;color:var(--text-mute);">Este resumen se genera automáticamente y se guarda en /Reportes.</div>
+    </div>
+  </div>`;
+}
+
+/* ===================== VISITA GUIADA ===================== */
+let extractDone = true;
+const _origRunExtraction = runExtraction;
+runExtraction = async function(){
+  extractDone = false;
+  await _origRunExtraction();
+  extractDone = true;
+};
+
+const TOUR_STEPS = [
+  {target:'.login-card', title:'¡Hola! Soy Flow 👋', next:'Empezar visita',
+   text:'Bienvenido a <b>ContaFlow</b>, el asistente que convierte facturas desorganizadas en datos contables listos para trabajar. Te doy un recorrido de 2 minutos por todo el sistema — sin que tengas que tocar nada.',
+   pre:()=>{ if(currentUser) logout(); }},
+  {target:'.login-users', title:'Un usuario para cada rol',
+   text:'Cada empresa tiene sus propios usuarios: el <b>Admin</b> configura todo, el <b>Operativo</b> trabaja su área asignada y el <b>Gerencial</b> solo ve resultados. Para la visita entraremos como Ana, la contadora principal.'},
+  {target:'#sb-nav', title:'El menú se adapta al rol',
+   text:'Ya estamos dentro como Ana (Admin). Estos son los módulos reales de la Fase 1, organizados en operación, canales de entrada y sistema. Un auxiliar o un gerente verían menos opciones.',
+   pre:()=>{ if(!currentUser){ fillLogin('ana.rosales'); attemptLogin(); } }},
+  {target:'.kpi-grid', title:'El mes de un vistazo',
+   text:'Documentos procesados, ITBIS identificado por la IA, gasto total y errores pendientes. Estos números se actualizan solos a medida que entran documentos.',
+   pre:()=>navigate('panel')},
+  {target:'.pipeline', title:'El corazón: 4 carpetas en Google Drive',
+   text:'Todo documento entra a <b>/Por_Procesar</b>. La IA lo lee, lo valida y lo mueve: los correctos a <b>/Procesados</b>, los que tienen problemas a <b>/Con_Errores</b>. Nadie vuelve a perseguir papeles.'},
+  {target:'.grid-32', title:'Gasto y estado en tiempo real',
+   text:'Distribución del gasto por categoría contable y salud del lote de documentos. Ideal para detectar de dónde vienen los errores antes del cierre de mes.'},
+  {target:'.doc-preview', title:'Así llega un documento',
+   text:'Esta es una factura dominicana ficticia recién llegada a <b>/Por_Procesar</b>. En producción, ContaFlow la detecta solo, cada 5 minutos, sin que nadie haga clic.',
+   pre:()=>navigate('procesar')},
+  {target:'#btn-proc', title:'Veamos la IA en acción', next:'Procesar ahora ✦',
+   text:'Al presionar el botón voy a disparar el motor de extracción. Observa la línea de escaneo sobre el documento, los 12 campos llenándose solos y las 5 validaciones fiscales.',
+   pre:()=>{ if(!document.querySelector('#btn-proc')) navigate('procesar'); }},
+  {target:'.extract-panel', title:'Extracción y validación en vivo', waitExtract:true,
+   text:'La IA lee tipo de documento, proveedor, RNC, NCF, ITBIS, total… y valida el formato fiscal dominicano. Al terminar, el documento se mueve a su carpeta y se notifica al responsable. <b>Espera a que termine…</b>',
+   pre:()=>{ if(!document.querySelector('.extract-panel')) navigate('procesar'); }},
+  {target:'section.block', title:'Revisión humana: la clave del control',
+   text:'Cuando la IA detecta un problema, el documento llega aquí. El analista ve la lista completa de pendientes y hace clic en <b>Revisar y corregir</b> para abrir la vista dividida.',
+   pre:()=>navigate('revision')},
+  {target:'.rev-split', title:'Vista dividida: documento + corrección',
+   text:'A la izquierda, el documento original (PDF/escaneo). A la derecha, todos los campos editables con el error resaltado. El analista compara, corrige y archiva sin salir de esta pantalla. Al guardar, el documento queda marcado con las iniciales de quién lo corrigió.',
+   pre:()=>{ const err=DOCS.find(d=>d.estado!=='ok'); if(err) openReview(err.id); else navigate('revision'); }},
+  {target:'section.block', title:'La cola de trabajo',
+   text:'Vista alternativa: cada usuario ve solo los documentos de su área. También puede abrir la revisión desde aquí.',
+   pre:()=>navigate('cola')},
+  {target:'.filters', title:'Todos los documentos, con filtros',
+   text:'Estado, categoría, proveedor… descarga a Excel e impresión. Los documentos corregidos por humano llevan la etiqueta ✎ con las iniciales del analista.',
+   pre:()=>navigate('documentos')},
+  {target:'.card', title:'Errores con explicación exacta',
+   text:'Nada de mensajes vagos: ContaFlow dice exactamente qué falló — NCF inválido, RNC incompleto, duplicado — y quién debe corregirlo.',
+   pre:()=>navigate('problemas')},
+  {target:'.grid-32', title:'Correo monitoreado',
+   text:'ContaFlow vigila solo las direcciones configuradas en el onboarding, extrae los adjuntos automáticamente y notifica al responsable interno. El remitente externo nunca recibe nada.',
+   pre:()=>navigate('correo')},
+  {target:'#conc-upload-area', title:'Conciliación bancaria: la estrella',
+   text:'El analista sube dos documentos: el <b>estado de cuenta del banco</b> y el <b>reporte del sistema contable</b>. Pueden ser PDFs, imágenes escaneadas o archivos digitales. Veamos cómo funciona…',
+   pre:()=>{concState='upload';bankLoaded=false;bookLoaded=false;navigate('conciliacion');}},
+  {target:'#btn-conc', title:'Carguemos los documentos', next:'Cargar y procesar ⇌',
+   text:'Voy a simular la carga de ambos documentos y luego disparar el proceso de conciliación. Observa cómo la IA cruza las transacciones automáticamente.',
+   pre:()=>{ loadBankDemo(); loadBookDemo(); }},
+  {target:'.conc-summary-grid', title:'Resultado: todo cruzado en segundos',
+   text:'La IA identificó <b>8 transacciones que coinciden exactamente</b>, <b>2 cheques en tránsito</b> (emitidos pero no cobrados) y <b>4 cargos bancarios no registrados en libros</b> (comisiones, intereses, notas de crédito). El informe completo está listo para imprimir.',
+   pre:()=>{}},
+  {target:'.dgii-preview', title:'Formato 606 DGII — automático',
+   text:'ContaFlow toma las facturas del mes, codifica NCF, RNC, ITBIS y forma de pago según la tabla de la DGII, y genera el archivo TXT listo para subir a la Oficina Virtual. Si hay documentos con errores, avisa que no se incluirán hasta que sean corregidos.',
+   pre:()=>navigate('dgii')},
+  {target:'.ncf-grid', title:'Control de NCF: nunca más sin comprobantes',
+   text:'Cada secuencia de NCF autorizada se monitorea: cuántos se han usado, cuántos quedan, cuándo vence. Alerta amarilla cuando quedan menos del 20%, roja cuando es crítico. Un contador que se queda sin NCF a mitad de mes tiene un problema grave.',
+   pre:()=>navigate('ncfcontrol')},
+  {target:'.ck-progress', title:'Checklist de cierre: cero estrés',
+   text:'Una lista que se marca sola a medida que el sistema confirma cada paso: documentos completos, 606 generado, conciliación hecha, reportes listos. El porcentaje sube automáticamente. Si algo bloquea el cierre, dice exactamente qué y por qué.',
+   pre:()=>navigate('cierre')},
+  {target:'.me-grid', title:'Todas tus empresas en una pantalla',
+   text:'El contador que lleva varias empresas ve de un vistazo: quién va al día, quién tiene errores pendientes, quién no ha hecho la conciliación, quién tiene el 606 listo. Ideal para priorizar el trabajo del equipo.',
+   pre:()=>navigate('multiempresa')},
+  {target:'.sheet-wrap', title:'La salida: Google Sheets',
+   text:'Cada documento procesado se convierte en una fila con sus 14 columnas: NCF, RNC, ITBIS, categoría, centro de costo, estado y observación. Sin ERP nuevo que aprender.',
+   pre:()=>navigate('salida')},
+  {target:'.daily-mail', title:'Resumen diario automático',
+   text:'Cada tarde el equipo recibe este correo: cuántos documentos entraron, el ITBIS del día, el gasto registrado y la lista exacta de lo que requiere atención.',
+   pre:()=>navigate('resumen')},
+  {target:'.drive-tree', title:'Repositorio: todo queda archivado',
+   text:'Cada documento procesado queda guardado en Google Drive con nombre estandarizado: FECHA_PROVEEDOR_NCF.pdf. Las carpetas se manejan solas. Haz clic en cualquier carpeta para ver su contenido.',
+   pre:()=>navigate('archivo')},
+  {target:'.cfg-grid', title:'Todo bajo control del Admin',
+   text:'Usuarios, roles, distribución del trabajo por área, correos monitoreados y categorías contables. Cada empresa es un entorno completamente aislado de las demás.',
+   pre:()=>navigate('config')},
+  {target:null, title:'¡Eso es ContaFlow! 🎉', next:'Explorar por mi cuenta',
+   text:'Ya viste el flujo completo: documento → IA → validación → datos limpios → equipo enfocado en lo que importa. Ahora explora libremente. <b>Consejo:</b> cierra sesión y entra como <b>director / demo123</b> para ver la vista gerencial. Puedes repetir esta visita con el botón de abajo a la izquierda.'},
+];
+
+let tourIdx = -1, tourActive = false, tourPoll = null;
+
+function startTour(){
+  clearInterval(tourPoll);
+  tourActive = true;
+  $('tour-launcher').classList.remove('show');
+  tourIdx = 0;
+  showStep(0);
+}
+function endTour(){
+  clearInterval(tourPoll);
+  tourActive = false;
+  $('tour-spot').classList.remove('on');
+  $('tour-bubble').classList.remove('on');
+  $('tour-launcher').classList.add('show');
+}
+function tourNext(){
+  if(tourIdx === 7){ runExtraction(); }   /* dispara la extracción al salir del paso del botón */
+  if(tourIdx === 16){ startConciliacion().then(()=>{ showStep(17); }); return; }  /* dispara conciliación */
+  if(tourIdx >= TOUR_STEPS.length-1){ endTour(); return; }
+  showStep(tourIdx+1);
+}
+function tourPrev(){
+  if(tourIdx <= 0) return;
+  showStep(tourIdx-1);
+}
+function showStep(i){
+  clearInterval(tourPoll);
+  tourIdx = i;
+  const s = TOUR_STEPS[i];
+  if(s.pre) s.pre();
+
+  $('tour-count').textContent = `Paso ${i+1} de ${TOUR_STEPS.length}`;
+  $('tour-title').innerHTML = s.title;
+  $('tour-text').innerHTML = s.text;
+  $('tour-bar').style.width = Math.round(((i+1)/TOUR_STEPS.length)*100)+'%';
+  $('tour-prev').style.visibility = i===0 ? 'hidden' : 'visible';
+  const nextBtn = $('tour-next');
+  nextBtn.textContent = s.next || (i===TOUR_STEPS.length-1 ? 'Terminar' : 'Siguiente →');
+  nextBtn.disabled = false;
+
+  if(s.waitExtract){
+    nextBtn.disabled = true;
+    nextBtn.textContent = 'Procesando…';
+    tourPoll = setInterval(()=>{
+      if(extractDone){
+        clearInterval(tourPoll);
+        nextBtn.disabled = false;
+        nextBtn.textContent = 'Siguiente →';
+        positionTour(document.querySelector('.extract-panel'));
+      }
+    }, 400);
+  }
+
+  setTimeout(()=>{
+    const el = s.target ? document.querySelector(s.target) : null;
+    positionTour(el);
+  }, s.pre ? 420 : 120);
+}
+function positionTour(el){
+  const spot = $('tour-spot'), bub = $('tour-bubble');
+  spot.classList.add('on'); bub.classList.add('on');
+  if(!el){
+    spot.style.top='50vh'; spot.style.left='50vw'; spot.style.width='0px'; spot.style.height='0px';
+    bub.style.top = Math.max(16,(innerHeight-bub.offsetHeight)/2)+'px';
+    bub.style.left = Math.max(16,(innerWidth-bub.offsetWidth)/2)+'px';
+    return;
+  }
+  el.scrollIntoView({block:'center', behavior:'smooth'});
+  setTimeout(()=>{
+    const r = el.getBoundingClientRect(), pad = 8;
+    spot.style.top=(r.top-pad)+'px'; spot.style.left=(r.left-pad)+'px';
+    spot.style.width=(r.width+pad*2)+'px'; spot.style.height=(r.height+pad*2)+'px';
+    const bw=bub.offsetWidth, bh=bub.offsetHeight;
+    let top = r.bottom + pad + 14;
+    if(top + bh > innerHeight - 16) top = r.top - pad - bh - 14;
+    if(top < 16) top = 16;
+    let left = Math.min(Math.max(16, r.left), innerWidth - bw - 16);
+    if(innerWidth < 720){ top = innerHeight - bh - 16; left = 16; }
+    bub.style.top = top+'px'; bub.style.left = left+'px';
+  }, 420);
+}
+window.addEventListener('resize', ()=>{
+  if(!tourActive) return;
+  const s = TOUR_STEPS[tourIdx];
+  positionTour(s.target ? document.querySelector(s.target) : null);
+});
+window.addEventListener('load', ()=> setTimeout(startTour, 700));
+
+/* ===================== CONFIG ===================== */
+function renderConfig(){
+  return `
+  <div class="main-header">
+    <div><h2>Configuración</h2><div class="sub">Usuarios, roles, correos y categorías — solo Admin</div></div>
+    ${demoBadge()}
+  </div>
+  <div class="cfg-grid">
+    <div class="card cfg-card">
+      <h4>Usuarios y roles</h4>
+      <div class="cfg-row"><span class="k">Ana Rosales · ana.rosales</span><span class="rle admin" style="font-size:10.5px;padding:2px 8px;border-radius:20px;">Admin</span></div>
+      <div class="cfg-row"><span class="k">Pedro Durán · pedro.duran</span><span class="rle oper" style="font-size:10.5px;padding:2px 8px;border-radius:20px;">Operativo</span></div>
+      <div class="cfg-row"><span class="k">María Checo · maria.checo</span><span class="rle oper" style="font-size:10.5px;padding:2px 8px;border-radius:20px;">Operativo</span></div>
+      <div class="cfg-row"><span class="k">Ramón Objío · director</span><span class="rle ger" style="font-size:10.5px;padding:2px 8px;border-radius:20px;">Gerencial</span></div>
+    </div>
+    <div class="card cfg-card">
+      <h4>Distribución de trabajo</h4>
+      <div class="cfg-row"><span class="k">Ana Rosales</span><span class="v">Facturas de proveedores</span></div>
+      <div class="cfg-row"><span class="k">Pedro Durán</span><span class="v">Gastos y combustible</span></div>
+      <div class="cfg-row"><span class="k">María Checo</span><span class="v">Nómina y TSS</span></div>
+      <div class="cfg-row"><span class="k">Ramón Objío</span><span class="v">Solo lectura KPIs</span></div>
+    </div>
+    <div class="card cfg-card">
+      <h4>Repositorio Google Drive</h4>
+      <div class="cfg-row"><span class="k">/Por_Procesar</span><span class="v">monitoreo cada 5 min</span></div>
+      <div class="cfg-row"><span class="k">/Procesados</span><span class="v">${DOCS.filter(d=>d.estado==='ok').length} archivos</span></div>
+      <div class="cfg-row"><span class="k">/Con_Errores</span><span class="v">${DOCS.filter(d=>d.estado!=='ok').length} archivos</span></div>
+      <div class="cfg-row"><span class="k">/Reportes</span><span class="v">resúmenes diarios</span></div>
+    </div>
+    <div class="card cfg-card">
+      <h4>Correo y categorías</h4>
+      <div class="cfg-row"><span class="k">Conexión de correo</span><span class="v">IMAP · 3 direcciones</span></div>
+      <div class="cfg-row"><span class="k">Motor IA</span><span class="v">GPT-4.1 mini + Vision</span></div>
+      <div class="cfg-row"><span class="k">Salida</span><span class="v">Google Sheets API</span></div>
+      <div class="cfg-row"><span class="k">Categorías activas</span><span class="v">${[...new Set(DOCS.map(d=>d.categoria))].length}</span></div>
+    </div>
+  </div>`;
+}
+</script>
+</body>
+</html>
